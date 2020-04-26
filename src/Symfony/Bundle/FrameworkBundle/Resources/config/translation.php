@@ -38,8 +38,11 @@ use Symfony\Component\Translation\Loader\PhpFileLoader;
 use Symfony\Component\Translation\Loader\PoFileLoader;
 use Symfony\Component\Translation\Loader\QtFileLoader;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
+use Symfony\Component\Translation\Loader\XliffRawLoader;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\LoggingTranslator;
+use Symfony\Component\Translation\Provider\ProvidersFactory;
+use Symfony\Component\Translation\Provider\TranslationProviders;
 use Symfony\Component\Translation\Reader\TranslationReader;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 use Symfony\Component\Translation\Writer\TranslationWriter;
@@ -83,6 +86,9 @@ return static function (ContainerConfigurator $container) {
 
         ->set('translation.loader.xliff', XliffFileLoader::class)
             ->tag('translation.loader', ['alias' => 'xlf', 'legacy-alias' => 'xliff'])
+
+        ->set('translation.loader.xliff_raw', XliffRawLoader::class)
+            ->tag('translation.loader', ['alias' => 'xlf_raw'])
 
         ->set('translation.loader.po', PoFileLoader::class)
             ->tag('translation.loader', ['alias' => 'po'])
@@ -158,5 +164,17 @@ return static function (ContainerConfigurator $container) {
             ->args([service(ContainerInterface::class)])
             ->tag('container.service_subscriber', ['id' => 'translator'])
             ->tag('kernel.cache_warmer')
+
+        ->set('translation.providers', TranslationProviders::class)
+            ->factory([service('translation.providers_factory'), 'fromConfig'])
+            ->args([
+                [], // TranslationProviders
+            ])
+
+        ->set('translation.providers_factory', ProvidersFactory::class)
+            ->args([
+                tagged_iterator('translation.provider_factory'),
+                [], // Enabled locales
+            ])
     ;
 };

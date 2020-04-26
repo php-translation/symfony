@@ -23,7 +23,6 @@ use Symfony\Component\Translation\Catalogue\MergeOperation;
 use Symfony\Component\Translation\Catalogue\TargetOperation;
 use Symfony\Component\Translation\Extractor\ExtractorInterface;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 use Symfony\Component\Translation\Writer\TranslationWriterInterface;
 
@@ -37,6 +36,8 @@ use Symfony\Component\Translation\Writer\TranslationWriterInterface;
  */
 class TranslationUpdateCommand extends Command
 {
+    use TranslationTrait;
+
     private const ASC = 'asc';
     private const DESC = 'desc';
     private const SORT_ORDERS = [self::ASC, self::DESC];
@@ -224,23 +225,7 @@ EOF
 
         $resultMessage = 'Translation files were successfully updated';
 
-        // move new messages to intl domain when possible
-        if (class_exists(\MessageFormatter::class)) {
-            foreach ($operation->getDomains() as $domain) {
-                $intlDomain = $domain.MessageCatalogueInterface::INTL_DOMAIN_SUFFIX;
-                $newMessages = $operation->getNewMessages($domain);
-
-                if ([] === $newMessages || ([] === $currentCatalogue->all($intlDomain) && [] !== $currentCatalogue->all($domain))) {
-                    continue;
-                }
-
-                $result = $operation->getResult();
-                $allIntlMessages = $result->all($intlDomain);
-                $currentMessages = array_diff_key($newMessages, $result->all($domain));
-                $result->replace($currentMessages, $domain);
-                $result->replace($allIntlMessages + $newMessages, $intlDomain);
-            }
-        }
+        $operation->moveMessagesToIntlDomainsIfPossible('new');
 
         // show compiled list of messages
         if (true === $input->getOption('dump-messages')) {
@@ -315,36 +300,5 @@ EOF
         $io->success($resultMessage.'.');
 
         return 0;
-    }
-
-    private function filterCatalogue(MessageCatalogue $catalogue, string $domain): MessageCatalogue
-    {
-        $filteredCatalogue = new MessageCatalogue($catalogue->getLocale());
-
-        // extract intl-icu messages only
-        $intlDomain = $domain.MessageCatalogueInterface::INTL_DOMAIN_SUFFIX;
-        if ($intlMessages = $catalogue->all($intlDomain)) {
-            $filteredCatalogue->add($intlMessages, $intlDomain);
-        }
-
-        // extract all messages and subtract intl-icu messages
-        if ($messages = array_diff($catalogue->all($domain), $intlMessages)) {
-            $filteredCatalogue->add($messages, $domain);
-        }
-        foreach ($catalogue->getResources() as $resource) {
-            $filteredCatalogue->addResource($resource);
-        }
-        if ($metadata = $catalogue->getMetadata('', $intlDomain)) {
-            foreach ($metadata as $k => $v) {
-                $filteredCatalogue->setMetadata($k, $v, $intlDomain);
-            }
-        }
-        if ($metadata = $catalogue->getMetadata('', $domain)) {
-            foreach ($metadata as $k => $v) {
-                $filteredCatalogue->setMetadata($k, $v, $domain);
-            }
-        }
-
-        return $filteredCatalogue;
     }
 }
