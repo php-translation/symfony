@@ -154,6 +154,9 @@ use Symfony\Component\Serializer\Normalizer\UnwrappingDenormalizer;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\String\LazyString;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProviderFactory;
+use Symfony\Component\Translation\Bridge\Lokalise\Provider\LokaliseProviderFactory;
+use Symfony\Component\Translation\Bridge\PoEditor\Provider\PoEditorProviderFactory;
 use Symfony\Component\Translation\Command\XliffLintCommand as BaseXliffLintCommand;
 use Symfony\Component\Translation\PseudoLocalizationTranslator;
 use Symfony\Component\Translation\Translator;
@@ -1152,11 +1155,14 @@ class FrameworkExtension extends Extension
         if (!$this->isConfigEnabled($container, $config)) {
             $container->removeDefinition('console.command.translation_debug');
             $container->removeDefinition('console.command.translation_update');
+            $container->removeDefinition('console.command.translation_pull');
+            $container->removeDefinition('console.command.translation_push');
 
             return;
         }
 
         $loader->load('translation.php');
+        $loader->load('translation_providers.php');
 
         // Use the "real" translator instead of the identity default
         $container->setAlias('translator', 'translator.default')->setPublic(true);
@@ -1217,6 +1223,44 @@ class FrameworkExtension extends Extension
             $container->getDefinition('console.command.translation_update')->replaceArgument(6, $transPaths);
         }
 
+        if ($config['providers']) {
+            if (!$config['enabled_locales']) {
+                throw new LogicException('You must specify framework.translator.enabled_locales in order to use providers.');
+            }
+
+            if ($container->hasDefinition('console.command.translation_pull')) {
+                $container->getDefinition('console.command.translation_pull')
+                    ->replaceArgument(5, $transPaths)
+                    ->replaceArgument(6, $config['enabled_locales'])
+                ;
+            }
+
+            if ($container->hasDefinition('console.command.translation_push')) {
+                $container->getDefinition('console.command.translation_push')
+                    ->replaceArgument(3, $transPaths)
+                    ->replaceArgument(4, $config['enabled_locales'])
+                ;
+            }
+
+            $container->getDefinition('translation.providers_factory')
+                ->replaceArgument(1, $config['enabled_locales'])
+            ;
+
+            $container->getDefinition('translation.providers')->setArgument(0, $config['providers']);
+
+            $classToServices = [
+                LocoProviderFactory::class => 'translation.provider_factory.loco',
+                PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
+                LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
+            ];
+
+            foreach ($classToServices as $class => $service) {
+                if (!class_exists($class)) {
+                    $container->removeDefinition($service);
+                }
+            }
+        }
+
         if ($container->fileExists($defaultDir)) {
             $dirs[] = $defaultDir;
         } else {
@@ -1275,6 +1319,45 @@ class FrameworkExtension extends Extension
                     new Reference('translator.pseudo.inner'),
                     $options,
                 ]);
+        }
+
+        if (!empty($config['providers'])) {
+            if (empty($config['enabled_locales'])) {
+                throw new LogicException('You must specify framework.translator.enabled_locales in order to use providers.');
+                throw new LogicException('You must specify framework.translator.enabled_locales in order to use providers.');
+            }
+
+            if ($container->hasDefinition('console.command.translation_pull')) {
+                $container->getDefinition('console.command.translation_pull')
+                    ->replaceArgument(5, $transPaths)
+                    ->replaceArgument(6, $config['enabled_locales'])
+                ;
+            }
+
+            if ($container->hasDefinition('console.command.translation_push')) {
+                $container->getDefinition('console.command.translation_push')
+                    ->replaceArgument(3, $transPaths)
+                    ->replaceArgument(4, $config['enabled_locales'])
+                ;
+            }
+
+            $container->getDefinition('translation.providers_factory')
+                ->replaceArgument(1, $config['enabled_locales'])
+            ;
+
+            $container->getDefinition('translation.providers')->setArgument(0, $config['providers']);
+
+            $classToServices = [
+                LocoProviderFactory::class => 'translation.provider_factory.loco',
+                PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
+                LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
+            ];
+
+            foreach ($classToServices as $class => $service) {
+                if (!class_exists($class)) {
+                    $container->removeDefinition($service);
+                }
+            }
         }
     }
 
