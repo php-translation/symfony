@@ -29,28 +29,28 @@ return static function (ContainerConfigurator $container) {
 
         ->set('translation.provider_factory.null', NullProviderFactory::class)
             ->args([
-                service('translation.loader.xliff_raw'),
+                service('translation.loader.xliff'),
             ])
             ->parent('translation.provider_factory.abstract')
             ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.loco', LocoProviderFactory::class)
             ->args([
-                service('translation.loader.xliff_raw'),
+                service('translation.loader.xliff'),
             ])
             ->parent('translation.provider_factory.abstract')
             ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.poeditor', PoEditorProviderFactory::class)
         ->args([
-            service('translation.loader.xliff_raw'),
+            service('translation.loader.xliff'),
         ])
         ->parent('translation.provider_factory.abstract')
         ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.lokalise', LokaliseProviderFactory::class)
         ->args([
-            service('translation.loader.xliff_raw'),
+            service('translation.loader.xliff'),
         ])
         ->parent('translation.provider_factory.abstract')
         ->tag('translation.provider_factory')
