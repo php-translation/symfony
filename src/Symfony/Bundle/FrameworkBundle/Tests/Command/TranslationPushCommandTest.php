@@ -58,7 +58,7 @@ class TranslationPushCommandTest extends TestCase
     public function providersProvider(): \Generator
     {
         yield [
-            ['loco' => $this->getMockBuilder('Symfony\Component\Translation\Bridge\Loco\LocoProvider')->disableOriginalConstructor()->getMock()],
+            ['loco' => $this->getMockBuilder(\Symfony\Component\Translation\Bridge\Loco\LocoProvider::class)->disableOriginalConstructor()->getMock()],
         ];
     }
 
@@ -80,7 +80,7 @@ class TranslationPushCommandTest extends TestCase
      */
     private function createCommandTester($providerMessages = [], $localMessages = [], array $providers = [], array $locales = [], array $domains = [], HttpKernel\KernelInterface $kernel = null, array $transPaths = [])
     {
-        $translator = $this->getMockBuilder('Symfony\Component\Translation\Translator')
+        $translator = $this->getMockBuilder(\Symfony\Component\Translation\Translator::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -89,7 +89,7 @@ class TranslationPushCommandTest extends TestCase
             ->method('getFallbackLocales')
             ->willReturn(['en']);
 
-        $reader = $this->getMockBuilder('Symfony\Component\Translation\Reader\TranslationReader')->getMock();
+        $reader = $this->getMockBuilder(\Symfony\Component\Translation\Reader\TranslationReader::class)->getMock();
         $reader
             ->expects($this->any())
             ->method('read')
@@ -99,7 +99,7 @@ class TranslationPushCommandTest extends TestCase
                 }
             );
 
-        $writer = $this->getMockBuilder('Symfony\Component\Translation\Writer\TranslationWriter')->getMock();
+        $writer = $this->getMockBuilder(\Symfony\Component\Translation\Writer\TranslationWriter::class)->getMock();
         $writer
             ->expects($this->any())
             ->method('getFormats')
@@ -107,7 +107,7 @@ class TranslationPushCommandTest extends TestCase
                 ['xlf', 'yml', 'yaml']
             );
 
-        $providersMock = $this->getMockBuilder('Symfony\Component\Translation\Provider\TranslationProviders')
+        $providersMock = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviders::class)
             ->setConstructorArgs([$providers])
             ->getMock();
 
@@ -140,7 +140,7 @@ class TranslationPushCommandTest extends TestCase
                 ['foo', $this->getBundle($this->translationDir)],
                 ['test', $this->getBundle('test')],
             ];
-            $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\KernelInterface')->getMock();
+            $kernel = $this->getMockBuilder(\Symfony\Component\HttpKernel\KernelInterface::class)->getMock();
             $kernel
                 ->expects($this->any())
                 ->method('getBundle')
@@ -168,7 +168,7 @@ class TranslationPushCommandTest extends TestCase
 
     private function getBundle($path)
     {
-        $bundle = $this->getMockBuilder('Symfony\Component\HttpKernel\Bundle\BundleInterface')->getMock();
+        $bundle = $this->getMockBuilder(\Symfony\Component\HttpKernel\Bundle\BundleInterface::class)->getMock();
         $bundle
             ->expects($this->any())
             ->method('getPath')
