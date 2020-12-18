@@ -38,7 +38,6 @@ use Symfony\Component\Translation\Loader\PhpFileLoader;
 use Symfony\Component\Translation\Loader\PoFileLoader;
 use Symfony\Component\Translation\Loader\QtFileLoader;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
-use Symfony\Component\Translation\Loader\XliffRawLoader;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\LoggingTranslator;
 use Symfony\Component\Translation\Provider\ProvidersFactory;
@@ -86,9 +85,6 @@ return static function (ContainerConfigurator $container) {
 
         ->set('translation.loader.xliff', XliffFileLoader::class)
             ->tag('translation.loader', ['alias' => 'xlf', 'legacy-alias' => 'xliff'])
-
-        ->set('translation.loader.xliff_raw', XliffRawLoader::class)
-            ->tag('translation.loader', ['alias' => 'xlf_raw'])
 
         ->set('translation.loader.po', PoFileLoader::class)
             ->tag('translation.loader', ['alias' => 'po'])

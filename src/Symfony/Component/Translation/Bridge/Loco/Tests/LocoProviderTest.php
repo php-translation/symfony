@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProvider;
 use Symfony\Component\Translation\Loader\ArrayLoader;
-use Symfony\Component\Translation\Loader\XliffRawLoader;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -184,7 +184,7 @@ class LocoProviderTest extends TestCase
             'validators' => ['post.num_comments' => '{count, plural, one {# commentaire} other {# commentaires}}'],
         ]));
 
-        $locoProvider = new LocoProvider('API_KEY', new MockHttpClient($responses), new XliffRawLoader(), $this->createMock(LoggerInterface::class), 'en');
+        $locoProvider = new LocoProvider('API_KEY', new MockHttpClient($responses), new XliffFileLoader(), $this->createMock(LoggerInterface::class), 'en');
         $locoProvider->write($translatorBag);
     }
 
@@ -209,7 +209,7 @@ class LocoProviderTest extends TestCase
             return $response;
         });
 
-        $locoProvider = new LocoProvider('API_KEY', $httpClient, new XliffRawLoader(), $this->createMock(LoggerInterface::class), 'en');
+        $locoProvider = new LocoProvider('API_KEY', $httpClient, new XliffFileLoader(), $this->createMock(LoggerInterface::class), 'en');
         $translatorBag = $locoProvider->read([$domain], [$locale]);
 
         $arrayLoader = new ArrayLoader();
@@ -243,7 +243,7 @@ class LocoProviderTest extends TestCase
                 return $response;
             });
 
-            $locoProvider = new LocoProvider('API_KEY', $httpClient, new XliffRawLoader(), $this->createMock(LoggerInterface::class), 'en');
+            $locoProvider = new LocoProvider('API_KEY', $httpClient, new XliffFileLoader(), $this->createMock(LoggerInterface::class), 'en');
             $translatorBag = $locoProvider->read($domains, [$locale]);
 
             $arrayLoader = new ArrayLoader();
@@ -276,19 +276,10 @@ class LocoProviderTest extends TestCase
 
     public function getLocoResponsesForOneLocaleAndOneDomain(): \Generator
     {
-        yield ['en', 'messages', <<<XLIFF
+        yield ['en', 'messages', <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Loco xml export: XLIFF 1.2
- Project: symfony-translation-provider
- Release: Working copy
- Locale: en, English
- Tagged: messages
- Exported by: Firstname Lastname
- Exported at: Tue, 15 Dec 2020 17:10:28 +0100
--->
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
-  <file original="https://localise.biz/welcomattic/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
+  <file original="https://localise.biz/user/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
     <header>
       <tool tool-id="loco" tool-name="Loco" tool-version="1.0.25 20201211-1" tool-company="Loco"/>
     </header>
@@ -304,6 +295,7 @@ class LocoProviderTest extends TestCase
     </body>
   </file>
 </xliff>
+
 XLIFF,
             [
                 'index.hello' => 'Hello',
@@ -311,19 +303,10 @@ XLIFF,
             ],
         ];
 
-        yield ['fr', 'messages', <<<XLIFF
+        yield ['fr', 'messages', <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Loco xml export: XLIFF 1.2
- Project: symfony-translation-provider
- Release: Working copy
- Locale: fr, French
- Tagged: messages
- Exported by: Firstname Lastname
- Exported at: Tue, 15 Dec 2020 17:10:28 +0100
--->
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
-  <file original="https://localise.biz/welcomattic/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
+  <file original="https://localise.biz/user/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
     <header>
       <tool tool-id="loco" tool-name="Loco" tool-version="1.0.25 20201211-1" tool-company="Loco"/>
     </header>
@@ -339,6 +322,7 @@ XLIFF,
     </body>
   </file>
 </xliff>
+
 XLIFF,
             [
                 'index.hello' => 'Bonjour',
@@ -353,19 +337,10 @@ XLIFF,
             ['en', 'fr'],
             ['messages', 'validators'],
             [
-                'en' => <<<XLIFF
+                'en' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Loco xml export: XLIFF 1.2
- Project: symfony-translation-provider
- Release: Working copy
- Locale: en, English
- Tagged: messages
- Exported by: Firstname Lastname
- Exported at: Tue, 15 Dec 2020 17:10:28 +0100
--->
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
-  <file original="https://localise.biz/welcomattic/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
+  <file original="https://localise.biz/user/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
     <header>
       <tool tool-id="loco" tool-name="Loco" tool-version="1.0.25 20201211-1" tool-company="Loco"/>
     </header>
@@ -381,20 +356,12 @@ XLIFF,
     </body>
   </file>
 </xliff>
+
 XLIFF,
-                'fr' => <<<XLIFF
+                'fr' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Loco xml export: XLIFF 1.2
- Project: symfony-translation-provider
- Release: Working copy
- Locale: fr, French
- Tagged: messages
- Exported by: Firstname Lastname
- Exported at: Tue, 15 Dec 2020 17:10:28 +0100
--->
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
-  <file original="https://localise.biz/welcomattic/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
+  <file original="https://localise.biz/user/symfony-translation-provider" source-language="en" datatype="database" tool-id="loco">
     <header>
       <tool tool-id="loco" tool-name="Loco" tool-version="1.0.25 20201211-1" tool-company="Loco"/>
     </header>
@@ -410,6 +377,7 @@ XLIFF,
     </body>
   </file>
 </xliff>
+
 XLIFF,
             ],
             [
