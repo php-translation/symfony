@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Symfony\Component\Translation\Bridge\Crowdin\Provider\CrowdinProviderFactory;
 use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProviderFactory;
 use Symfony\Component\Translation\Bridge\Lokalise\Provider\LokaliseProviderFactory;
 use Symfony\Component\Translation\Bridge\PoEditor\Provider\PoEditorProviderFactory;
@@ -33,6 +34,14 @@ return static function (ContainerConfigurator $container) {
             ])
             ->parent('translation.provider_factory.abstract')
             ->tag('translation.provider_factory')
+
+        ->set('translation.provider_factory.crowdin', CrowdinProviderFactory::class)
+        ->args([
+            service('translation.loader.xliff'),
+            service('translation.dumper.xliff'),
+        ])
+        ->parent('translation.provider_factory.abstract')
+        ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.loco', LocoProviderFactory::class)
             ->args([
