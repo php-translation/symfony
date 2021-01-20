@@ -154,6 +154,7 @@ use Symfony\Component\Serializer\Normalizer\UnwrappingDenormalizer;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\String\LazyString;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Translation\Bridge\Crowdin\Provider\CrowdinProviderFactory;
 use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProviderFactory;
 use Symfony\Component\Translation\Bridge\Lokalise\Provider\LokaliseProviderFactory;
 use Symfony\Component\Translation\Bridge\PoEditor\Provider\PoEditorProviderFactory;
@@ -1252,6 +1253,7 @@ class FrameworkExtension extends Extension
                 LocoProviderFactory::class => 'translation.provider_factory.loco',
                 PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
                 LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
+                CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
             ];
 
             foreach ($classToServices as $class => $service) {
@@ -1351,6 +1353,7 @@ class FrameworkExtension extends Extension
                 LocoProviderFactory::class => 'translation.provider_factory.loco',
                 PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
                 LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
+                CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
             ];
 
             foreach ($classToServices as $class => $service) {
