@@ -23,6 +23,7 @@ interface TranslatorBagInterface
     /**
      * Gets the catalogue by locale.
      *
+     * @param string|null $locale The locale or null to use the default
      * @return MessageCatalogueInterface
      *
      * @throws InvalidArgumentException If the locale contains invalid characters

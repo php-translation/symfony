@@ -37,20 +37,22 @@ class XliffFileLoader implements LoaderInterface
             throw new RuntimeException('Loading translations from the Xliff format requires the Symfony Config component.');
         }
 
-        if (!stream_is_local($resource) && !$this->isXml($resource)) {
-            throw new InvalidResourceException(sprintf('This is not a local file "%s".', $resource));
-        }
+        if (!$this->isXmlString($resource)) {
+            if (!stream_is_local($resource)) {
+                throw new InvalidResourceException(sprintf('This is not a local file "%s".', $resource));
+            }
 
-        if (!file_exists($resource) && !$this->isXml($resource)) {
-            throw new NotFoundResourceException(sprintf('File "%s" not found.', $resource));
-        }
+            if (!file_exists($resource)) {
+                throw new NotFoundResourceException(sprintf('File "%s" not found.', $resource));
+            }
 
-        if (!is_file($resource) && !$this->isXml($resource)) {
-            throw new InvalidResourceException(sprintf('This is neither a file nor an XLIFF string "%s".', $resource));
+            if (!is_file($resource)) {
+                throw new InvalidResourceException(sprintf('This is neither a file nor an XLIFF string "%s".', $resource));
+            }
         }
 
         try {
-            if ($this->isXml($resource)) {
+            if ($this->isXmlString($resource)) {
                 $dom = XmlUtils::parse($resource);
             } else {
                 $dom = XmlUtils::loadFile($resource);
@@ -66,7 +68,7 @@ class XliffFileLoader implements LoaderInterface
         $catalogue = new MessageCatalogue($locale);
         $this->extract($dom, $catalogue, $domain);
 
-        if (is_file($resource) && class_exists('Symfony\Component\Config\Resource\FileResource')) {
+        if (is_file($resource) && class_exists(FileResource::class)) {
             $catalogue->addResource(new FileResource($resource));
         }
 
@@ -109,7 +111,7 @@ class XliffFileLoader implements LoaderInterface
                     continue;
                 }
 
-                $source = $attributes['resname'] ?? $translation->source;
+                $source = isset($attributes['resname']) && $attributes['resname'] ? $attributes['resname'] : $translation->source;
                 // If the xlf file has another encoding specified, try to convert it because
                 // simple_xml will always return utf-8 encoded values
                 $target = $this->utf8ToCharset((string) ($translation->target ?? $translation->source), $encoding);
@@ -223,7 +225,7 @@ class XliffFileLoader implements LoaderInterface
         return $notes;
     }
 
-    private function isXml($resource): bool
+    private function isXmlString(string $resource): bool
     {
         return 0 === strpos($resource, '<?xml');
     }

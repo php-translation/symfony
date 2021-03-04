@@ -27,14 +27,18 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class LocoProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'loco';
+    private const HOST = 'localise.biz/api';
 
-    /** @var LoaderInterface */
+    private $client;
+    private $logger;
+    private $defaultLocale;
     private $loader;
 
-    public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null, LoaderInterface $loader = null)
+    public function __construct(HttpClientInterface $client, LoggerInterface $logger, string $defaultLocale, LoaderInterface $loader)
     {
-        parent::__construct($client, $logger, $defaultLocale);
-
+        $this->client = $client;
+        $this->logger = $logger;
+        $this->defaultLocale = $defaultLocale;
         $this->loader = $loader;
     }
 
@@ -44,10 +48,14 @@ final class LocoProviderFactory extends AbstractProviderFactory
     public function create(Dsn $dsn): ProviderInterface
     {
         if (self::SCHEME === $dsn->getScheme()) {
-            return (new LocoProvider($this->getUser($dsn), $this->client, $this->loader, $this->logger, $this->defaultLocale))
-                ->setHost('default' === $dsn->getHost() ? null : $dsn->getHost())
-                ->setPort($dsn->getPort())
-            ;
+            $client = $this->client->withOptions([
+                'base_uri' => sprintf('%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : ''),
+                'headers' => [
+                    'Authorization' => 'Loco ' . $this->getUser($dsn),
+                ],
+            ]);
+
+            return new LocoProvider($client, $this->loader, $this->logger, $this->defaultLocale);
         }
 
         throw new UnsupportedSchemeException($dsn, self::SCHEME, $this->getSupportedSchemes());

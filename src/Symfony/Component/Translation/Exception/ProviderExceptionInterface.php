@@ -14,9 +14,12 @@ namespace Symfony\Component\Translation\Exception;
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @experimental in 5.2
+ * @experimental in 5.3
  */
 interface ProviderExceptionInterface extends ExceptionInterface
 {
+    /*
+     * Returns debug info coming from the ResponseInterface
+     */
     public function getDebug(): string;
 }

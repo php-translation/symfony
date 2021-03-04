@@ -81,7 +81,7 @@ class TranslationPullCommandTest extends TestCase
                 ['xlf', 'yml', 'yaml']
             );
 
-        $providers = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviders::class)->getMock();
+        $providers = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviderCollection::class)->getMock();
         $providers
             ->expects($this->any())
             ->method('keys')

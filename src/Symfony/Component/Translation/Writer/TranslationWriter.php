@@ -23,7 +23,6 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class TranslationWriter implements TranslationWriterInterface
 {
-    /** @var DumperInterface[] */
     private $dumpers = [];
 
     /**

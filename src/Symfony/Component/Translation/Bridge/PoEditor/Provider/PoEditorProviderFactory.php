@@ -26,15 +26,19 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class PoEditorProviderFactory extends AbstractProviderFactory
 {
-    const SCHEME = 'poeditor';
+    public const SCHEME = 'poeditor';
+    private const HOST = 'api.poeditor.com/v2';
 
-    /** @var LoaderInterface */
+    private $client;
+    private $logger;
+    private $defaultLocale;
     private $loader;
 
     public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null, LoaderInterface $loader = null)
     {
-        parent::__construct($client, $logger, $defaultLocale);
-
+        $this->client = $client;
+        $this->logger = $logger;
+        $this->defaultLocale = $defaultLocale;
         $this->loader = $loader;
     }
 
@@ -44,10 +48,11 @@ final class PoEditorProviderFactory extends AbstractProviderFactory
     public function create(Dsn $dsn): ProviderInterface
     {
         if (self::SCHEME === $dsn->getScheme()) {
-            return (new PoEditorProvider($this->getUser($dsn), $this->getPassword($dsn), $this->client, $this->loader, $this->logger, $this->defaultLocale))
-                ->setHost('default' === $dsn->getHost() ? null : $dsn->getHost())
-                ->setPort($dsn->getPort())
-            ;
+            $client = $this->client->withOptions([
+                'base_uri' => sprintf('%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : ''),
+            ]);
+
+            return new PoEditorProvider($this->getUser($dsn), $this->getPassword($dsn), $client, $this->loader, $this->logger, $this->defaultLocale);
         }
 
         throw new UnsupportedSchemeException($dsn, self::SCHEME, $this->getSupportedSchemes());

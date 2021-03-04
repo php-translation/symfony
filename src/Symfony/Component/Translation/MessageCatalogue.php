@@ -19,7 +19,7 @@ use Symfony\Component\Translation\Exception\LogicException;
  */
 class MessageCatalogue implements MessageCatalogueInterface, MetadataAwareInterface
 {
-    private $messages;
+    private $messages = [];
     private $metadata = [];
     private $resources = [];
     private $locale;
@@ -30,7 +30,7 @@ class MessageCatalogue implements MessageCatalogueInterface, MetadataAwareInterf
      * @param string $locale   The locale
      * @param array  $messages An array of messages classified by domain
      */
-    public function __construct(string $locale, array $messages = [])
+    public function __construct(string $locale, array $messages)
     {
         $this->locale = $locale;
         $this->messages = $messages;

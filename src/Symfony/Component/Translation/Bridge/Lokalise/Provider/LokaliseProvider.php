@@ -12,11 +12,9 @@
 namespace Symfony\Component\Translation\Bridge\Lokalise\Provider;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Exception\ProviderException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\Provider\AbstractProvider;
 use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -30,39 +28,21 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Keys refers to Symfony's translation keys;
  * Translations refers to Symfony's translated messages
  */
-final class LokaliseProvider extends AbstractProvider
+final class LokaliseProvider
 {
-    protected const HOST = 'api.lokalise.com/api2';
-
-    /** @var string */
-    private $apiKey;
-
-    /** @var string */
     private $projectId;
-
-    /** @var LoaderInterface|null */
+    private $client;
     private $loader;
-
-    /** @var LoggerInterface|null */
     private $logger;
-
-    /** @var string|null */
     private $defaultLocale;
 
-    public function __construct(string $projectId, string $apiKey, HttpClientInterface $client = null, LoaderInterface $loader = null, LoggerInterface $logger = null, string $defaultLocale = null)
+    public function __construct(string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale)
     {
         $this->projectId = $projectId;
-        $this->apiKey = $apiKey;
+        $this->client = $client;
         $this->loader = $loader;
         $this->logger = $logger;
         $this->defaultLocale = $defaultLocale;
-
-        parent::__construct($client);
-    }
-
-    public function __toString(): string
-    {
-        return sprintf(LokaliseProviderFactory::SCHEME.'://%s', $this->getEndpoint());
     }
 
     public function getName(): string
@@ -78,9 +58,6 @@ final class LokaliseProvider extends AbstractProvider
         $this->createKeysWithTranslations($translatorBag);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function read(array $domains, array $locales): TranslatorBag
     {
         $translatorBag = new TranslatorBag();
@@ -105,9 +82,6 @@ final class LokaliseProvider extends AbstractProvider
         return $translatorBag;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function delete(TranslatorBag $translatorBag): void
     {
         $catalogue = $translatorBag->getCatalogue($this->defaultLocale);
@@ -127,22 +101,13 @@ final class LokaliseProvider extends AbstractProvider
             }
         }
 
-        $response = $this->client->request('DELETE', sprintf('https://%s/projects/%s/keys', $this->getEndpoint(), $this->projectId), [
-            'headers' => $this->getDefaultHeaders(),
-            'body' => json_encode(['keys' => $keysIds]),
+        $response = $this->client->request('DELETE', sprintf('/projects/%s/keys', $this->projectId), [
+            'json' => ['keys' => $keysIds],
         ]);
 
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
+        if (200 !== $response->getStatusCode()) {
             throw new ProviderException(sprintf('Unable to delete keys from Lokalise: "%s".', $response->getContent(false)), $response);
         }
-    }
-
-    protected function getDefaultHeaders(): array
-    {
-        return [
-            'X-Api-Token' => $this->apiKey,
-            'Content-Type' => 'application/json',
-        ];
     }
 
     /**
@@ -185,12 +150,11 @@ final class LokaliseProvider extends AbstractProvider
         $chunks = array_chunk($keys, 500);
 
         foreach ($chunks as $chunk) {
-            $response = $this->client->request('POST', sprintf('https://%s/projects/%s/keys', $this->getEndpoint(), $this->projectId), [
-                'headers' => $this->getDefaultHeaders(),
-                'body' => json_encode(['keys' => $chunk]),
+            $response = $this->client->request('POST', sprintf('/projects/%s/keys', $this->projectId), [
+                'json' => ['keys' => $chunk],
             ]);
 
-            if (Response::HTTP_OK !== $response->getStatusCode()) {
+            if (200 !== $response->getStatusCode()) {
                 throw new ProviderException(sprintf('Unable to add keys and translations to Lokalise: "%s".', $response->getContent(false)), $response);
             }
         }
@@ -201,25 +165,24 @@ final class LokaliseProvider extends AbstractProvider
      */
     private function exportFiles(array $locales, array $domains): array
     {
-        $response = $this->client->request('POST', sprintf('https://%s/projects/%s/files/export', $this->getEndpoint(), $this->projectId), [
-            'headers' => $this->getDefaultHeaders(),
-            'body' => json_encode([
+        $response = $this->client->request('POST', sprintf('/projects/%s/files/export', $this->projectId), [
+            'json' => [
                 'format' => 'symfony_xliff',
                 'original_filenames' => true,
                 'directory_prefix' => '%LANG_ISO%',
                 'filter_langs' => array_values($locales),
                 'filter_filenames' => array_map([$this, 'generateLokaliseFilenameFromDomain'], $domains),
-            ]),
+            ],
         ]);
 
         $responseContent = $response->getContent(false);
 
-        if (Response::HTTP_NOT_ACCEPTABLE === $response->getStatusCode()
+        if (406 === $response->getStatusCode()
             && 'No keys found with specified filenames.' === json_decode($responseContent, true)['error']['message']) {
             return [];
         }
 
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
+        if (200 !== $response->getStatusCode()) {
             throw new ProviderException(sprintf('Unable to export translations from Lokalise: "%s".', $responseContent), $response);
         }
 
@@ -228,8 +191,7 @@ final class LokaliseProvider extends AbstractProvider
 
     private function getKeysIds(array $keys, string $domain): array
     {
-        $response = $this->client->request('GET', sprintf('https://%s/projects/%s/keys', $this->getEndpoint(), $this->projectId), [
-            'headers' => $this->getDefaultHeaders(),
+        $response = $this->client->request('GET', sprintf('/projects/%s/keys', $this->projectId), [
             'query' => [
                 'filter_keys' => $keys,
                 'filter_filenames' => $this->generateLokaliseFilenameFromDomain($domain),
@@ -238,7 +200,7 @@ final class LokaliseProvider extends AbstractProvider
 
         $responseContent = $response->getContent(false);
 
-        if (Response::HTTP_OK !== $response->getStatusCode()) {
+        if (200 !== $response->getStatusCode()) {
             throw new ProviderException(sprintf('Unable to get keys ids from Lokalise: "%s".', $responseContent), $response);
         }
 

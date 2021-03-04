@@ -35,15 +35,13 @@ class CrowdinProviderTest extends TestCase
 
     /**
      * @dataProvider toStringDataProvider
-     * @param CrowdinProvider $provider
-     * @param string $expected
      */
-    public function testToString(CrowdinProvider $provider, string $expected): void
+    public function testToString(CrowdinProvider $provider, string $expected)
     {
         $this->assertSame($expected, (string) $provider);
     }
 
-    public function testGetName(): void
+    public function testGetName()
     {
         $this->assertSame('crowdin', (new CrowdinProvider('PROJECT_ID', 'API_TOKEN'))->getName());
     }
@@ -63,13 +61,12 @@ class CrowdinProviderTest extends TestCase
 
     /**
      * @dataProvider getDefaultHostDataProvider
-     * @param CrowdinProvider $provider
-     * @param string $expected
+     *
      * @throws ReflectionException
      */
-    public function testGetDefaultHost(CrowdinProvider $provider, string $expected): void
+    public function testGetDefaultHost(CrowdinProvider $provider, string $expected)
     {
-        $reflection = new ReflectionClass(get_class($provider));
+        $reflection = new ReflectionClass(\get_class($provider));
         $method = $reflection->getMethod('getDefaultHost');
         $method->setAccessible(true);
 
@@ -78,11 +75,11 @@ class CrowdinProviderTest extends TestCase
         $this->assertSame($expected, $actualResult);
     }
 
-    public function testGetDefaultHeaders(): void
+    public function testGetDefaultHeaders()
     {
         $provider = new CrowdinProvider('PROJECT_ID', 'API_TOKEN');
 
-        $reflection = new ReflectionClass(get_class($provider));
+        $reflection = new ReflectionClass(\get_class($provider));
         $method = $reflection->getMethod('getDefaultHeaders');
         $method->setAccessible(true);
 

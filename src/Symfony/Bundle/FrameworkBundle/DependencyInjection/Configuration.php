@@ -826,7 +826,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                         ->arrayNode('providers')
-                            ->info('TranslationProviders you can pull/push your translations from')
+                            ->info('Translation providers you can read/write your translations from')
                             ->useAttributeAsKey('name')
                             ->prototype('array')
                                 ->children()

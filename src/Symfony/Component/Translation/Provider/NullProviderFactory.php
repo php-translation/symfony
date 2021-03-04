@@ -11,7 +11,9 @@
 
 namespace Symfony\Component\Translation\Provider;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
@@ -21,6 +23,17 @@ use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
 final class NullProviderFactory extends AbstractProviderFactory
 {
     const SCHEME = 'null';
+
+    protected $client;
+    protected $logger;
+    protected $defaultLocale;
+
+    public function __construct(HttpClientInterface $client, LoggerInterface $logger, string $defaultLocale)
+    {
+        $this->client = $client;
+        $this->logger = $logger;
+        $this->defaultLocale = $defaultLocale;
+    }
 
     public function create(Dsn $dsn): ProviderInterface
     {

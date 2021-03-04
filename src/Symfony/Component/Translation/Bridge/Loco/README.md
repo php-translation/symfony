@@ -1,5 +1,5 @@
 Loco Translation Provider
-=================
+=========================
 
 Provides Loco integration for Symfony Translation.
 

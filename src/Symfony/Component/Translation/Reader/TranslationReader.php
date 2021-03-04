@@ -48,9 +48,6 @@ class TranslationReader implements TranslationReaderInterface
             return;
         }
 
-        /**
-         * @var LoaderInterface $loader
-         */
         foreach ($this->loaders as $format => $loader) {
             // load any existing translation files
             $finder = new Finder();

@@ -17,8 +17,10 @@ use Symfony\Component\Translation\TranslatorBag;
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
  *
  * @experimental in 5.3
+ *
+ * The class is used to filter domains and locales between the Translator config values and those specific to each provider.
  */
-class ProviderDecorator implements ProviderInterface
+class FilteringProvider implements ProviderInterface
 {
     private $provider;
     private $locales;
@@ -29,11 +31,6 @@ class ProviderDecorator implements ProviderInterface
         $this->provider = $provider;
         $this->locales = $locales;
         $this->domains = $domains;
-    }
-
-    public function __toString(): string
-    {
-        return $this->provider->__toString();
     }
 
     public function getName(): string
@@ -49,20 +46,14 @@ class ProviderDecorator implements ProviderInterface
         $this->provider->write($translatorBag);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function read(array $domains, array $locales): TranslatorBag
     {
-        $domains = $this->domains ? $domains : array_intersect($this->domains, $domains);
+        $domains = !$this->domains ? $domains : array_intersect($this->domains, $domains);
         $locales = array_intersect($this->locales, $locales);
 
         return $this->provider->read($domains, $locales);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function delete(TranslatorBag $translatorBag): void
     {
         $this->provider->delete($translatorBag);

@@ -1,5 +1,5 @@
 Crowdin Translation Provider
-=================
+============================
 
 Provides Crowdin integration for Symfony Translation.
 

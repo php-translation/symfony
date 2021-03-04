@@ -1,5 +1,5 @@
 Lokalise Translation Provider
-=================
+=============================
 
 Provides Lokalise integration for Symfony Translation.
 

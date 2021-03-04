@@ -18,7 +18,7 @@ use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
  *
  * @experimental in 5.3
  */
-class ProvidersFactory
+class TranslationProviderCollectionFactory
 {
     private $factories;
     private $enabledLocales;
@@ -32,7 +32,7 @@ class ProvidersFactory
         $this->enabledLocales = $enabledLocales;
     }
 
-    public function fromConfig(array $config): TranslationProviders
+    public function fromConfig(array $config): TranslationProviderCollection
     {
         $providers = [];
         foreach ($config as $name => $currentConfig) {
@@ -43,7 +43,7 @@ class ProvidersFactory
             );
         }
 
-        return new TranslationProviders($providers);
+        return new TranslationProviderCollection($providers);
     }
 
     public function fromString(string $dsn, array $locales, array $domains = []): ProviderInterface
@@ -55,7 +55,7 @@ class ProvidersFactory
     {
         foreach ($this->factories as $factory) {
             if ($factory->supports($dsn)) {
-                return new ProviderDecorator($factory->create($dsn), $locales, $domains);
+                return new FilteringProvider($factory->create($dsn), $locales, $domains);
             }
         }
 

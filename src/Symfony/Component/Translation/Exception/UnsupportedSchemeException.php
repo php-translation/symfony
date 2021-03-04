@@ -11,11 +11,29 @@
 
 namespace Symfony\Component\Translation\Exception;
 
+use Symfony\Component\Translation\Bridge;
 use Symfony\Component\Translation\Provider\Dsn;
 
 class UnsupportedSchemeException extends LogicException
 {
-    private const SCHEME_TO_PACKAGE_MAP = [];
+    private const SCHEME_TO_PACKAGE_MAP = [
+        'crowdin' => [
+            'class' => Bridge\Crowdin\Provider\CrowdinProviderFactory::class,
+            'package' => 'symfony/crowdin-translation',
+        ],
+        'loco' => [
+            'class' => Bridge\Loco\Provider\LocoProviderFactory::class,
+            'package' => 'symfony/loco-translation',
+        ],
+        'lokalise' => [
+            'class' => Bridge\Lokalise\Provider\LokaliseProviderFactory::class,
+            'package' => 'symfony/lokalise-translation',
+        ],
+        'poeditor' => [
+            'class' => Bridge\POEditor\Provider\POEditorProviderFactory::class,
+            'package' => 'symfony/poeditor-translation',
+        ],
+    ];
 
     public function __construct(Dsn $dsn, string $name = null, array $supported = [])
     {

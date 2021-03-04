@@ -107,7 +107,7 @@ class TranslationPushCommandTest extends TestCase
                 ['xlf', 'yml', 'yaml']
             );
 
-        $providersMock = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviders::class)
+        $providersMock = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviderCollection::class)
             ->setConstructorArgs([$providers])
             ->getMock();
 

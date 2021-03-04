@@ -13,33 +13,19 @@ namespace Symfony\Component\Translation\Provider;
 
 use Symfony\Component\Translation\TranslatorBag;
 
-/**
- * Providers are used to sync translations with a translation provider.
- */
 interface ProviderInterface
 {
-    /**
-     * Returns the Provider name.
-     */
     public function getName(): string;
 
     /**
-     * Writes given translations to the provider.
-     *
-     * * Translations available in the MessageCatalogue only must be created.
-     * * Translations available in both the MessageCatalogue and on the provider
+     * Translations available in the MessageCatalogue only must be created.
+     * Translations available in both the MessageCatalogue and on the provider
      * must be overwritten.
-     * * Translations available on the provider only must be kept.
+     * Translations available on the provider only must be kept.
      */
     public function write(TranslatorBag $translatorBag): void;
 
-    /**
-     * Returns asked translations.
-     */
     public function read(array $domains, array $locales): TranslatorBag;
 
-    /**
-     * Delete all translation given in the TranslatorBag.
-     */
     public function delete(TranslatorBag $translatorBag): void;
 }

@@ -28,34 +28,44 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CrowdinProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'crowdin';
-
+    private const HOST = 'api.crowdin.com/api/v2';
     private const DSN_OPTION_DOMAIN = 'domain';
 
-    /** @var LoaderInterface */
+    private $client;
+    private $logger;
+    private $defaultLocale;
     private $loader;
-
-    /** @var XliffFileDumper */
     private $xliffFileDumper;
 
-    public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null, LoaderInterface $loader = null, XliffFileDumper $xliffFileDumper = null)
+    public function __construct(HttpClientInterface $client, LoggerInterface $logger, string $defaultLocale, LoaderInterface $loader, XliffFileDumper $xliffFileDumper)
     {
-        parent::__construct($client, $logger, $defaultLocale);
-
+        $this->client = $client;
+        $this->logger = $logger;
+        $this->defaultLocale = $defaultLocale;
         $this->loader = $loader;
         $this->xliffFileDumper = $xliffFileDumper;
     }
 
     /**
-     * @param Dsn $dsn
      * @return CrowdinProvider
      */
     public function create(Dsn $dsn): ProviderInterface
     {
         if (self::SCHEME === $dsn->getScheme()) {
-            return (new CrowdinProvider($this->getUser($dsn), $this->getPassword($dsn), $dsn->getOption(self::DSN_OPTION_DOMAIN), $this->client, $this->loader, $this->logger, $this->defaultLocale, $this->xliffFileDumper))
-                ->setHost('default' === $dsn->getHost() ? null : $dsn->getHost())
-                ->setPort($dsn->getPort())
-            ;
+            if ($dsn->getOption(self::DSN_OPTION_DOMAIN)) {
+                $host = sprintf('%s.%s', $dsn->getOption(self::DSN_OPTION_DOMAIN), self::HOST);
+            } else {
+                $host = self::HOST;
+            }
+
+            $client = $this->client->withOptions([
+                'base_uri' => sprintf('%s%s', $host, $dsn->getPort() ? ':'.$dsn->getPort() : ''),
+                'headers' => [
+                    'Authorization' => 'Bearer '.$this->getPassword($dsn),
+                ],
+            ]);
+
+            return new CrowdinProvider($this->getUser($dsn), $client, $this->loader, $this->logger, $this->defaultLocale, $this->xliffFileDumper);
         }
 
         throw new UnsupportedSchemeException($dsn, self::SCHEME, $this->getSupportedSchemes());

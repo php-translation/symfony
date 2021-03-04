@@ -19,7 +19,7 @@ use Symfony\Component\Translation\Provider\ProviderInterface;
  *
  * @experimental in 5.3
  */
-final class TranslationProviders
+final class TranslationProviderCollection
 {
     private $providers;
 

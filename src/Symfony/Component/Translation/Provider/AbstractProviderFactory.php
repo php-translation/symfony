@@ -17,22 +17,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class AbstractProviderFactory implements ProviderFactoryInterface
 {
-    /** @var HttpClientInterface|null */
-    protected $client;
-
-    /** @var LoggerInterface|null */
-    protected $logger;
-
-    /** @var string|null */
-    protected $defaultLocale;
-
-    public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null)
-    {
-        $this->client = $client;
-        $this->logger = $logger;
-        $this->defaultLocale = $defaultLocale;
-    }
-
     public function supports(Dsn $dsn): bool
     {
         return \in_array($dsn->getScheme(), $this->getSupportedSchemes());

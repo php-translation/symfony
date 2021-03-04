@@ -1,5 +1,5 @@
 PoEditor Translation Provider
-=================
+=============================
 
 Provides PoEditor integration for Symfony Translation.
 

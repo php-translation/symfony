@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Translation\Catalogue\TargetOperation;
 use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\Provider\TranslationProviders;
+use Symfony\Component\Translation\Provider\TranslationProviderCollection;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 use Symfony\Component\Translation\Writer\TranslationWriterInterface;
 
@@ -41,7 +41,7 @@ final class TranslationPullCommand extends Command
     private $transPaths;
     private $enabledLocales;
 
-    public function __construct(TranslationProviders $providers, TranslationWriterInterface $writer, TranslationReaderInterface $reader, string $defaultLocale, string $defaultTransPath = null, array $transPaths = [], array $enabledLocales = [])
+    public function __construct(TranslationProviderCollection $providers, TranslationWriterInterface $writer, TranslationReaderInterface $reader, string $defaultLocale, string $defaultTransPath = null, array $transPaths = [], array $enabledLocales = [])
     {
         $this->providers = $providers;
         $this->writer = $writer;
@@ -69,7 +69,6 @@ final class TranslationPullCommand extends Command
             ->setDefinition([
                 new InputArgument('provider', null !== $defaultProvider ? InputArgument::OPTIONAL : InputArgument::REQUIRED, 'The provider to pull translations from.', $defaultProvider),
                 new InputOption('force', null, InputOption::VALUE_NONE, 'Override existing translations with provider ones (it will delete not synchronized messages).'),
-                new InputOption('delete-obsolete', null, InputOption::VALUE_NONE, 'Delete translations available locally but not on provider.'),
                 new InputOption('domains', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Specify the domains to pull.'),
                 new InputOption('locales', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Specify the locales to pull.'),
                 new InputOption('output-format', null, InputOption::VALUE_OPTIONAL, 'Override the default output format.', 'xlf'),
@@ -80,17 +79,13 @@ final class TranslationPullCommand extends Command
 The <info>%command.name%</info> pull translations from the given provider. Only
 new translations are pulled, existing ones are not overwritten.
 
-You can overwrite existing translations:
+You can overwrite existing translations (and remove the missing ones on local side):
 
   <info>php %command.full_name% --force provider</info>
 
-You can remove local translations which are not present on the provider:
-
-  <info>php %command.full_name% --delete-obsolete provider</info>
-
 Full example:
 
-  <info>php %command.full_name% provider --force --delete-obsolete --domains=messages,validators --locales=en</info>
+  <info>php %command.full_name% provider --force --domains=messages,validators --locales=en</info>
 
 This command will pull all translations linked to domains messages and validators
 for the locale en. Local translations for the specified domains and locale will
@@ -112,7 +107,6 @@ EOF
         $locales = $input->getOption('locales') ?: $this->enabledLocales;
         $domains = $input->getOption('domains');
         $force = $input->getOption('force');
-        $deleteObsolete = $input->getOption('delete-obsolete');
 
         $writeOptions = [
             'path' => end($this->transPaths),
@@ -126,10 +120,6 @@ EOF
         $providerTranslations = $provider->read($domains, $locales);
 
         if ($force) {
-            if ($deleteObsolete) {
-                $io->note('The --delete-obsolete option is ineffective with --force');
-            }
-
             foreach ($providerTranslations->getCatalogues() as $catalogue) {
                 $operation = new TargetOperation((new MessageCatalogue($catalogue->getLocale())), $catalogue);
                 $operation->moveMessagesToIntlDomainsIfPossible();
@@ -147,18 +137,6 @@ EOF
         }
 
         $localTranslations = $this->readLocalTranslations($locales, $domains, $this->transPaths);
-
-        if ($deleteObsolete) {
-            $obsoleteTranslations = $localTranslations->diff($providerTranslations);
-            $translationsWithoutObsoleteToWrite = $localTranslations->diff($obsoleteTranslations);
-
-            foreach ($translationsWithoutObsoleteToWrite->getCatalogues() as $catalogue) {
-                $this->writer->write($catalogue, $input->getOption('output-format'), $writeOptions);
-            }
-
-            $io->success('Obsolete translations has been locally removed.');
-        }
-
         $translationsToWrite = $providerTranslations->diff($localTranslations);
 
         foreach ($translationsToWrite->getCatalogues() as $catalogue) {
