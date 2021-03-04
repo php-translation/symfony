@@ -107,7 +107,7 @@ final class PoEditorProvider
             $exportResponseContent = $exportResponse->getContent(false);
 
             if (200 !== $exportResponse->getStatusCode()) {
-                throw new ProviderException('Unable to read the POEditor response: '.$exportResponseContent, $exportResponse);
+                throw new ProviderException('Unable to read the PoEditor response: '.$exportResponseContent, $exportResponse);
             }
 
             $response = $this->client->request('GET', json_decode($exportResponseContent, true)['result']['url']);
@@ -153,7 +153,7 @@ final class PoEditorProvider
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add new translation keys to POEditor: (status code: "%s") "%s".', $response->getStatusCode(), $response->getContent(false)), $response);
+            throw new ProviderException(sprintf('Unable to add new translation keys to PoEditor: (status code: "%s") "%s".', $response->getStatusCode(), $response->getContent(false)), $response);
         }
     }
 
@@ -169,7 +169,7 @@ final class PoEditorProvider
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add translation messages to POEditor: "%s".', $response->getContent(false)), $response);
+            throw new ProviderException(sprintf('Unable to add translation messages to PoEditor: "%s".', $response->getContent(false)), $response);
         }
     }
 
@@ -184,7 +184,7 @@ final class PoEditorProvider
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to delete translation keys on POEditor: "%s".', $response->getContent(false)), $response);
+            throw new ProviderException(sprintf('Unable to delete translation keys on PoEditor: "%s".', $response->getContent(false)), $response);
         }
     }
 }

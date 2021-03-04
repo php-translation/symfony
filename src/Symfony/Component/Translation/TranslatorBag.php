@@ -55,7 +55,7 @@ final class TranslatorBag implements TranslatorBagInterface
         return $messages;
     }
 
-    public function getCatalogue(string $locale = null): ?MessageCatalogue
+    public function getCatalogue(string $locale = null)
     {
         if (null === $locale) {
             return null;
