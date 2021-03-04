@@ -28,7 +28,7 @@ final class NullProviderFactory extends AbstractProviderFactory
     protected $logger;
     protected $defaultLocale;
 
-    public function __construct(HttpClientInterface $client, LoggerInterface $logger, string $defaultLocale)
+    public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null)
     {
         $this->client = $client;
         $this->logger = $logger;
