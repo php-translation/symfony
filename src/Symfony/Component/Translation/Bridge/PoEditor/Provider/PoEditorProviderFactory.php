@@ -43,7 +43,7 @@ final class PoEditorProviderFactory extends AbstractProviderFactory
     }
 
     /**
-     * @return PhraseProvider
+     * @return PoEditorProvider
      */
     public function create(Dsn $dsn): ProviderInterface
     {
