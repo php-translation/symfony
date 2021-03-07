@@ -3,10 +3,13 @@
 namespace Symfony\Component\Translation\Bridge\PoEditor\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\PoEditor\Provider\PoEditorProviderFactory;
 use Symfony\Component\Translation\Exception\IncompleteDsnException;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
+use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\Dsn;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PoEditorProviderFactoryTest extends TestCase
 {
@@ -51,6 +54,6 @@ class PoEditorProviderFactoryTest extends TestCase
 
     private function createFactory(): PoEditorProviderFactory
     {
-        return new PoEditorProviderFactory();
+        return new PoEditorProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class));
     }
 }

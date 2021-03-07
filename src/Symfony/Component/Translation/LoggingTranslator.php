@@ -82,6 +82,16 @@ class LoggingTranslator implements TranslatorInterface, TranslatorBagInterface, 
         return $this->translator->getCatalogue($locale);
     }
 
+    public function getCatalogues(): array
+    {
+        return $this->translator->getCatalogues();
+    }
+
+    public function getDomains(): array
+    {
+        return $this->translator->getDomains();
+    }
+
     /**
      * Gets the fallback locales.
      *

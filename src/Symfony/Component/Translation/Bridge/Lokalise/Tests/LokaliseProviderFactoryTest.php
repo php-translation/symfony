@@ -3,10 +3,13 @@
 namespace Symfony\Component\Translation\Bridge\Lokalise\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\Lokalise\Provider\LokaliseProviderFactory;
 use Symfony\Component\Translation\Exception\IncompleteDsnException;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
+use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\Dsn;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class LokaliseProviderFactoryTest extends TestCase
 {
@@ -51,6 +54,6 @@ class LokaliseProviderFactoryTest extends TestCase
 
     private function createFactory(): LokaliseProviderFactory
     {
-        return new LokaliseProviderFactory();
+        return new LokaliseProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class));
     }
 }

@@ -79,6 +79,16 @@ class DataCollectorTranslator implements TranslatorInterface, TranslatorBagInter
         return $this->translator->getCatalogue($locale);
     }
 
+    public function getCatalogues(): array
+    {
+        return $this->translator->getCatalogues();
+    }
+
+    public function getDomains(): array
+    {
+        return $this->translator->getDomains();
+    }
+
     /**
      * {@inheritdoc}
      *

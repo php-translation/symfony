@@ -16,6 +16,7 @@ use Symfony\Component\Translation\Exception\ProviderException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -48,7 +49,7 @@ final class LocoProvider implements ProviderInterface
         return LocoProviderFactory::SCHEME;
     }
 
-    public function write(TranslatorBag $translatorBag): void
+    public function write(TranslatorBagInterface $translatorBag): void
     {
         $catalogue = $translatorBag->getCatalogue($this->defaultLocale);
 

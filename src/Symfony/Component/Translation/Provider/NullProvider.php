@@ -15,6 +15,7 @@ use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Translation\Event\MessageEvent;
 use Symfony\Component\Translation\Message\MessageInterface;
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Component\Translation\TranslatorBagInterface;
 
 /**
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
@@ -30,7 +31,7 @@ class NullProvider implements ProviderInterface
         return NullProviderFactory::SCHEME . '://default';
     }
 
-    public function write(TranslatorBag $translatorBag, bool $override = false): void
+    public function write(TranslatorBagInterface $translatorBag, bool $override = false): void
     {
     }
 

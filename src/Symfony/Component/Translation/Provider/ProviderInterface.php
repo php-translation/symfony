@@ -12,6 +12,7 @@
 namespace Symfony\Component\Translation\Provider;
 
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Component\Translation\TranslatorBagInterface;
 
 interface ProviderInterface
 {
@@ -23,7 +24,7 @@ interface ProviderInterface
      * must be overwritten.
      * Translations available on the provider only must be kept.
      */
-    public function write(TranslatorBag $translatorBag): void;
+    public function write(TranslatorBagInterface $translatorBag): void;
 
     public function read(array $domains, array $locales): TranslatorBag;
 

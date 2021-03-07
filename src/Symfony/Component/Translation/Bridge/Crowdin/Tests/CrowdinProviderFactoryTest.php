@@ -3,10 +3,14 @@
 namespace Symfony\Component\Translation\Bridge\Crowdin\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\Crowdin\Provider\CrowdinProviderFactory;
+use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Exception\IncompleteDsnException;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
+use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\Dsn;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CrowdinProviderFactoryTest extends TestCase
 {
@@ -74,6 +78,6 @@ class CrowdinProviderFactoryTest extends TestCase
 
     private function createFactory(): CrowdinProviderFactory
     {
-        return new CrowdinProviderFactory();
+        return new CrowdinProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class), $this->createMock(XliffFileDumper::class));
     }
 }

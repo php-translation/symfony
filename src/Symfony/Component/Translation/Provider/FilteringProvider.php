@@ -12,6 +12,7 @@
 namespace Symfony\Component\Translation\Provider;
 
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Component\Translation\TranslatorBagInterface;
 
 /**
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
@@ -41,7 +42,7 @@ class FilteringProvider implements ProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function write(TranslatorBag $translatorBag): void
+    public function write(TranslatorBagInterface $translatorBag): void
     {
         $this->provider->write($translatorBag);
     }

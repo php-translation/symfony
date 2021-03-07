@@ -3,10 +3,13 @@
 namespace Symfony\Component\Translation\Bridge\Loco\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProviderFactory;
 use Symfony\Component\Translation\Exception\IncompleteDsnException;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
+use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\Dsn;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class LocoProviderFactoryTest extends TestCase
 {
@@ -51,6 +54,6 @@ class LocoProviderFactoryTest extends TestCase
 
     private function createFactory(): LocoProviderFactory
     {
-        return new LocoProviderFactory();
+        return new LocoProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class));
     }
 }

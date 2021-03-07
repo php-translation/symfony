@@ -18,6 +18,7 @@ use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -56,7 +57,7 @@ final class CrowdinProvider implements ProviderInterface
         return CrowdinProviderFactory::SCHEME;
     }
 
-    public function write(TranslatorBag $translatorBag): void
+    public function write(TranslatorBagInterface $translatorBag): void
     {
         foreach ($translatorBag->getDomains() as $domain) {
             /** @var MessageCatalogue $catalogue */

@@ -243,6 +243,22 @@ class Translator implements TranslatorInterface, TranslatorBagInterface, LocaleA
         return $this->catalogues[$locale];
     }
 
+    public function getCatalogues(): array
+    {
+        return array_values($this->catalogues);
+    }
+
+    public function getDomains(): array
+    {
+        $domains = [];
+
+        foreach ($this->catalogues as $catalogue) {
+            $domains += $catalogue->getDomains();
+        }
+
+        return array_unique($domains);
+    }
+
     /**
      * Gets the loaders.
      *
