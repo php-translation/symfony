@@ -31,7 +31,7 @@ class UnsupportedSchemeException extends LogicException
         ],
         'poeditor' => [
             'class' => Bridge\PoEditor\Provider\PoEditorProviderFactory::class,
-            'package' => 'symfony/poeditor-translation',
+            'package' => 'symfony/po-editor-translation',
         ],
     ];
 

@@ -31,6 +31,7 @@ final class TranslationPushCommand extends Command
     use TranslationTrait;
 
     protected static $defaultName = 'translation:push';
+    protected static $defaultDescription = 'Push translations to a given provider.';
 
     private $providers;
     private $reader;
@@ -69,16 +70,15 @@ final class TranslationPushCommand extends Command
                 new InputOption('output-format', null, InputOption::VALUE_OPTIONAL, 'Override the default output format.', 'xlf'),
                 new InputOption('xliff-version', null, InputOption::VALUE_OPTIONAL, 'Override the default xliff version.', '1.2'),
             ])
-            ->setDescription('Push translations to a given provider.')
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> push translations to the given provider. Only new
+The <info>%command.name%</info> pushes translations to the given provider. Only new
 translations are pushed, existing ones are not overwritten.
 
-You can overwrite existing translations:
+You can overwrite existing translations by using the <comment>--force</> flag:
 
   <info>php %command.full_name% --force provider</info>
 
-You can delete provider translations which are not present locally:
+You can delete provider translations which are not present locally by using the <comment>--delete-missing</> flag:
 
   <info>php %command.full_name% --delete-missing provider</info>
 
@@ -86,10 +86,9 @@ Full example:
 
   <info>php %command.full_name% provider --force --delete-missing --domains=messages,validators --locales=en</info>
 
-This command will push all translations linked to domains messages and validators
-for the locale en. Provider translations for the specified domains and locale will
-be erased if they're not present locally and overwritten if it's the
-case. Provider translations for others domains and locales will be ignored.
+This command pushes all translations associated with the <comment>messages</> and <comment>validators</> domains for the <comment>en</> locale.
+Provider translations for the specified domains and locale are deleted if they're not present locally and overwritten if it's the case.
+Provider translations for others domains and locales are ignored.
 EOF
             )
         ;
@@ -101,7 +100,7 @@ EOF
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->enabledLocales) {
-            throw new InvalidArgumentException('You must defined framework.translator.enabled_locales config key in order to work with providers.');
+            throw new InvalidArgumentException('You must define framework.translator.enabled_locales config key in order to work with translation providers.');
         }
 
         $io = new SymfonyStyle($input, $output);
@@ -121,12 +120,7 @@ EOF
         if (!$deleteMissing && $force) {
             $provider->write($localTranslations);
 
-            $io->success(sprintf(
-                'All local translations has been sent to %s (for [%s] locale(s), and [%s] domain(s)).',
-                $provider->getName(),
-                implode(', ', $locales),
-                implode(', ', $domains)
-            ));
+            $io->success(sprintf('All local translations has been sent to %s (for "%s" locale(s), and "%s" domain(s)).', $provider->getName(), implode(', ', $locales), implode(', ', $domains)));
 
             return 0;
         }
@@ -137,12 +131,7 @@ EOF
             $missingMessages = $providerTranslations->diff($localTranslations);
             $provider->delete($missingMessages);
 
-            $io->success(sprintf(
-                'Missing translations on %s has been deleted (for [%s] locale(s), and [%s] domain(s)).',
-                $provider->getName(),
-                implode(', ', $locales),
-                implode(', ', $domains)
-            ));
+            $io->success(sprintf('Missing translations on %s has been deleted (for "%s" locale(s), and "%s" domain(s)).', $provider->getName(), implode(', ', $locales), implode(', ', $domains)));
         }
 
         $translationsToWrite = $localTranslations->diff($providerTranslations);
@@ -153,13 +142,7 @@ EOF
 
         $provider->write($translationsToWrite);
 
-        $io->success(sprintf(
-            '%s local translations has been sent to %s (for [%s] locale(s), and [%s] domain(s)).',
-            $force ? 'All' : 'New',
-            $input->getArgument('provider'),
-            implode(', ', $locales),
-            implode(', ', $domains)
-        ));
+        $io->success(sprintf('%s local translations has been sent to %s (for "%s" locale(s), and "%s" domain(s)).', $force ? 'All' : 'New', $input->getArgument('provider'), implode(', ', $locales), implode(', ', $domains)));
 
         return 0;
     }

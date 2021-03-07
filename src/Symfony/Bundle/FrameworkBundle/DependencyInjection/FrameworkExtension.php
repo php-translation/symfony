@@ -1291,7 +1291,7 @@ class FrameworkExtension extends Extension
             }
 
             if (!$config['enabled_locales'] && !$isLocalesParameterDefined) {
-                throw new LogicException('You must specify framework.translator.enabled_locales or framework.translator.providers.{provider_name}.locales in order to use providers.');
+                throw new LogicException('You must specify framework.translator.enabled_locales or framework.translator.providers.{provider_name}.locales in order to use translation providers.');
             }
 
             $container->getDefinition('console.command.translation_pull')

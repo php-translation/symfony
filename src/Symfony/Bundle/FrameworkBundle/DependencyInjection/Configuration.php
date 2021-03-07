@@ -839,7 +839,7 @@ class Configuration implements ConfigurationInterface
                                     ->arrayNode('locales')
                                         ->prototype('scalar')->end()
                                         ->defaultValue([])
-                                        ->info('If not set, all locales listed under framework.translator.enabled_locales will be used.')
+                                        ->info('If not set, all locales listed under framework.translator.enabled_locales are used.')
                                     ->end()
                                 ->end()
                             ->end()

@@ -33,6 +33,7 @@ final class TranslationPullCommand extends Command
     use TranslationTrait;
 
     protected static $defaultName = 'translation:pull';
+    protected static $defaultDescription = 'Pull translations from a given provider.';
 
     private $providers;
     private $writer;
@@ -74,12 +75,11 @@ final class TranslationPullCommand extends Command
                 new InputOption('output-format', null, InputOption::VALUE_OPTIONAL, 'Override the default output format.', 'xlf'),
                 new InputOption('xliff-version', null, InputOption::VALUE_OPTIONAL, 'Override the default xliff version.', '1.2'),
             ])
-            ->setDescription('Pull translations from a given provider.')
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> pull translations from the given provider. Only
+The <info>%command.name%</info> pulls translations from the given provider. Only
 new translations are pulled, existing ones are not overwritten.
 
-You can overwrite existing translations (and remove the missing ones on local side):
+You can overwrite existing translations (and remove the missing ones on local side) by using the <comment>--force</> flag:
 
   <info>php %command.full_name% --force provider</info>
 
@@ -87,10 +87,9 @@ Full example:
 
   <info>php %command.full_name% provider --force --domains=messages,validators --locales=en</info>
 
-This command will pull all translations linked to domains messages and validators
-for the locale en. Local translations for the specified domains and locale will
-be erased if they're not present on the provider and overwritten if it's the
-case. Local translations for others domains and locales will be ignored.
+This command pulls all translations associated with the <comment>messages</> and <comment>validators</> domains for the <comment>en</> locale.
+Local translations for the specified domains and locale are deleted if they're not present on the provider and overwritten if it's the case.
+Local translations for others domains and locales are ignored.
 EOF
             )
         ;
@@ -126,12 +125,7 @@ EOF
                 $this->writer->write($operation->getResult(), $input->getOption('output-format'), $writeOptions);
             }
 
-            $io->success(sprintf(
-                'Local translations has been updated from %s (for [%s] locale(s), and [%s] domain(s)).',
-                $provider->getName(),
-                implode(', ', $locales),
-                implode(', ', $domains)
-            ));
+            $io->success(sprintf('Local translations has been updated from %s (for "%s" locale(s), and "%s" domain(s)).', $provider->getName(), implode(', ', $locales), implode(', ', $domains)));
 
             return 0;
         }
@@ -143,12 +137,7 @@ EOF
             $this->writer->write($catalogue, $input->getOption('output-format'), $writeOptions);
         }
 
-        $io->success(sprintf(
-            'New translations from %s has been written locally (for [%s] locale(s), and [%s] domain(s)).',
-            $provider->getName(),
-            implode(', ', $locales),
-            implode(', ', $domains)
-        ));
+        $io->success(sprintf('New translations from %s has been written locally (for "%s" locale(s), and "%s" domain(s)).', $provider->getName(), implode(', ', $locales), implode(', ', $domains)));
 
         return 0;
     }

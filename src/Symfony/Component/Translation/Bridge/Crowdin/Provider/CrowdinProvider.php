@@ -28,9 +28,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * @experimental in 5.3
  *
  * In Crowdin:
- * Filenames refers to Symfony's translation domains;
- * Identifiers refers to Symfony's translation keys;
- * Translations refers to Symfony's translated messages
+ * * Filenames refers to Symfony's translation domains;
+ * * Identifiers refers to Symfony's translation keys;
+ * * Translations refers to Symfony's translated messages
  */
 final class CrowdinProvider implements ProviderInterface
 {

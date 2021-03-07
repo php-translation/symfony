@@ -24,10 +24,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *
  * @experimental in 5.3
  *
- * In POeditor:
- * Terms refers to Symfony's translation keys;
- * Translations refers to Symfony's translated messages;
- * Tags refers to Symfony's translation domains
+ * In PoEditor:
+ * * Terms refers to Symfony's translation keys;
+ * * Translations refers to Symfony's translated messages;
+ * * Tags refers to Symfony's translation domains
  */
 final class PoEditorProvider implements ProviderInterface
 {

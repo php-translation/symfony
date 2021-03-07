@@ -18,21 +18,20 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Translation\Provider\TranslationProviderCollection;
+use Symfony\Component\Translation\Reader\TranslationReader;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\Writer\TranslationWriter;
 
 /**
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
- *
- * @experimental in 5.3
  */
 class TranslationPullCommandTest extends TestCase
 {
     private $fs;
     private $translationDir;
-
-    public function testPullNewMessages()
-    {
-        $this->markTestIncomplete();
-    }
 
     protected function setUp(): void
     {
@@ -47,14 +46,19 @@ class TranslationPullCommandTest extends TestCase
         $this->fs->remove($this->translationDir);
     }
 
+    public function testPullNewMessages()
+    {
+        $this->markTestIncomplete();
+    }
+
     /**
      * @return CommandTester
      */
-    private function createCommandTester($extractedMessages = [], $loadedMessages = [], HttpKernel\KernelInterface $kernel = null, array $transPaths = [], array $viewsPaths = [])
+    private function createCommandTester($extractedMessages = [], $loadedMessages = [], KernelInterface $kernel = null, array $transPaths = [], array $viewsPaths = [])
     {
         $this->markTestIncomplete();
 
-        $translator = $this->getMockBuilder(\Symfony\Component\Translation\Translator::class)
+        $translator = $this->getMockBuilder(Translator::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -63,7 +67,7 @@ class TranslationPullCommandTest extends TestCase
             ->method('getFallbackLocales')
             ->willReturn(['en']);
 
-        $loader = $this->getMockBuilder(\Symfony\Component\Translation\Reader\TranslationReader::class)->getMock();
+        $loader = $this->getMockBuilder(TranslationReader::class)->getMock();
         $loader
             ->expects($this->any())
             ->method('read')
@@ -73,7 +77,7 @@ class TranslationPullCommandTest extends TestCase
                 }
             );
 
-        $writer = $this->getMockBuilder(\Symfony\Component\Translation\Writer\TranslationWriter::class)->getMock();
+        $writer = $this->getMockBuilder(TranslationWriter::class)->getMock();
         $writer
             ->expects($this->any())
             ->method('getFormats')
@@ -81,7 +85,7 @@ class TranslationPullCommandTest extends TestCase
                 ['xlf', 'yml', 'yaml']
             );
 
-        $providers = $this->getMockBuilder(\Symfony\Component\Translation\Provider\TranslationProviderCollection::class)->getMock();
+        $providers = $this->getMockBuilder(TranslationProviderCollection::class)->getMock();
         $providers
             ->expects($this->any())
             ->method('keys')
@@ -94,7 +98,7 @@ class TranslationPullCommandTest extends TestCase
                 ['foo', $this->getBundle($this->translationDir)],
                 ['test', $this->getBundle('test')],
             ];
-            $kernel = $this->getMockBuilder(\Symfony\Component\HttpKernel\KernelInterface::class)->getMock();
+            $kernel = $this->getMockBuilder(KernelInterface::class)->getMock();
             $kernel
                 ->expects($this->any())
                 ->method('getBundle')
@@ -122,7 +126,7 @@ class TranslationPullCommandTest extends TestCase
 
     private function getBundle($path)
     {
-        $bundle = $this->getMockBuilder(\Symfony\Component\HttpKernel\Bundle\BundleInterface::class)->getMock();
+        $bundle = $this->getMockBuilder(BundleInterface::class)->getMock();
         $bundle
             ->expects($this->any())
             ->method('getPath')
