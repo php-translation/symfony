@@ -14,6 +14,7 @@ namespace Symfony\Component\Translation\Bridge\PoEditor\Provider;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Exception\ProviderException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -27,7 +28,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Translations refers to Symfony's translated messages;
  * Tags refers to Symfony's translation domains
  */
-final class PoEditorProvider
+final class PoEditorProvider implements ProviderInterface
 {
     private $apiKey;
     private $projectId;

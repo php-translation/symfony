@@ -18,7 +18,7 @@ CHANGELOG
  * Deprecate all other values than "none", "php_array" and "file" for `framework.annotation.cache`
  * Add `KernelTestCase::getContainer()` as the best way to get a container in tests
  * Rename the container parameter `profiler_listener.only_master_requests` to `profiler_listener.only_main_requests`
- * Added `TranslationPullCommand` and `TranslationPushCommand` to manage translations with third party Providers
+ * Add `TranslationPullCommand` and `TranslationPushCommand` to manage translations with third party Providers
 
 5.2.0
 -----

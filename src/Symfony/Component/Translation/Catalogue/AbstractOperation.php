@@ -164,7 +164,7 @@ abstract class AbstractOperation implements OperationInterface
             switch ($batch) {
                 case 'obsolete': $messages = $this->getObsoleteMessages($domain); break;
                 case 'new': $messages = $this->getNewMessages($domain); break;
-                case 'all':$messages = $this->getMessages($domain); break;
+                case 'all': $messages = $this->getMessages($domain); break;
                 default: throw new \InvalidArgumentException('$batch argument must be one of [\'all\', \'obsolete\', \'new\'].');
             }
 

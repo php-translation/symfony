@@ -829,6 +829,7 @@ class Configuration implements ConfigurationInterface
                             ->info('Translation providers you can read/write your translations from')
                             ->useAttributeAsKey('name')
                             ->prototype('array')
+                                ->fixXmlConfig('provider')
                                 ->children()
                                     ->scalarNode('dsn')->end()
                                     ->arrayNode('domains')

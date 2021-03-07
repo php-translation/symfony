@@ -28,14 +28,14 @@ return static function (ContainerConfigurator $container) {
             ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.crowdin', CrowdinProviderFactory::class)
-        ->args([
-            service('http_client'),
-            service('logger'),
-            param('kernel.default_locale'),
-            service('translation.loader.xliff'),
-            service('translation.dumper.xliff'),
-        ])
-        ->tag('translation.provider_factory')
+            ->args([
+                service('http_client'),
+                service('logger'),
+                param('kernel.default_locale'),
+                service('translation.loader.xliff'),
+                service('translation.dumper.xliff'),
+            ])
+            ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.loco', LocoProviderFactory::class)
             ->args([
@@ -47,21 +47,21 @@ return static function (ContainerConfigurator $container) {
             ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.poeditor', PoEditorProviderFactory::class)
-        ->args([
-            service('http_client'),
-            service('logger'),
-            param('kernel.default_locale'),
-            service('translation.loader.xliff'),
-        ])
-        ->tag('translation.provider_factory')
+            ->args([
+                service('http_client'),
+                service('logger'),
+                param('kernel.default_locale'),
+                service('translation.loader.xliff'),
+            ])
+            ->tag('translation.provider_factory')
 
         ->set('translation.provider_factory.lokalise', LokaliseProviderFactory::class)
-        ->args([
-            service('http_client'),
-            service('logger'),
-            param('kernel.default_locale'),
-            service('translation.loader.xliff'),
-        ])
-        ->tag('translation.provider_factory')
+            ->args([
+                service('http_client'),
+                service('logger'),
+                param('kernel.default_locale'),
+                service('translation.loader.xliff'),
+            ])
+            ->tag('translation.provider_factory')
     ;
 };

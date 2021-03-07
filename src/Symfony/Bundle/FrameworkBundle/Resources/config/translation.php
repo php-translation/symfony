@@ -164,7 +164,7 @@ return static function (ContainerConfigurator $container) {
         ->set('translation.provider_collection', TranslationProviderCollection::class)
             ->factory([service('translation.provider_collection_factory'), 'fromConfig'])
             ->args([
-                [], // TranslationProviderCollection
+                [],
             ])
 
         ->set('translation.provider_collection_factory', TranslationProviderCollectionFactory::class)

@@ -34,7 +34,7 @@ final class PoEditorProviderFactory extends AbstractProviderFactory
     private $defaultLocale;
     private $loader;
 
-    public function __construct(HttpClientInterface $client = null, LoggerInterface $logger = null, string $defaultLocale = null, LoaderInterface $loader = null)
+    public function __construct(HttpClientInterface $client, LoggerInterface $logger, string $defaultLocale, LoaderInterface $loader)
     {
         $this->client = $client;
         $this->logger = $logger;

@@ -1294,19 +1294,15 @@ class FrameworkExtension extends Extension
                 throw new LogicException('You must specify framework.translator.enabled_locales or framework.translator.providers.{provider_name}.locales in order to use providers.');
             }
 
-            if ($container->hasDefinition('console.command.translation_pull')) {
-                $container->getDefinition('console.command.translation_pull')
-                    ->replaceArgument(5, $transPaths)
-                    ->replaceArgument(6, $config['enabled_locales'])
-                ;
-            }
+            $container->getDefinition('console.command.translation_pull')
+                ->replaceArgument(5, $transPaths)
+                ->replaceArgument(6, $config['enabled_locales'])
+            ;
 
-            if ($container->hasDefinition('console.command.translation_push')) {
-                $container->getDefinition('console.command.translation_push')
-                    ->replaceArgument(3, $transPaths)
-                    ->replaceArgument(4, $config['enabled_locales'])
-                ;
-            }
+            $container->getDefinition('console.command.translation_push')
+                ->replaceArgument(3, $transPaths)
+                ->replaceArgument(4, $config['enabled_locales'])
+            ;
 
             $container->getDefinition('translation.provider_collection_factory')
                 ->replaceArgument(1, $config['enabled_locales'])

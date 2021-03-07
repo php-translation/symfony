@@ -16,6 +16,7 @@ use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Exception\ProviderException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -30,7 +31,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Identifiers refers to Symfony's translation keys;
  * Translations refers to Symfony's translated messages
  */
-final class CrowdinProvider
+final class CrowdinProvider implements ProviderInterface
 {
     private $projectId;
     private $client;

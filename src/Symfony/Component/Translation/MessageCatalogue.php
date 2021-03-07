@@ -19,7 +19,7 @@ use Symfony\Component\Translation\Exception\LogicException;
  */
 class MessageCatalogue implements MessageCatalogueInterface, MetadataAwareInterface
 {
-    private $messages;
+    private $messages = [];
     private $metadata = [];
     private $resources = [];
     private $locale;

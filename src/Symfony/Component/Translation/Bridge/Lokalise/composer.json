@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=7.2.5",
-        "symfony/http-client": "^5.3",
+        "symfony/http-client-contracts": "^2.4",
         "symfony/translation": "^5.3"
     },
     "autoload": {
