@@ -16,6 +16,9 @@ use Symfony\Component\Translation\Exception\InvalidArgumentException;
 /**
  * TranslatorBagInterface.
  *
+ * @method array getCatalogues() Returns all catalogues of the instance
+ * @method array getDomains() Returns all unique domains of the instance
+ *
  * @author Abdellatif Ait boudad <a.aitboudad@gmail.com>
  */
 interface TranslatorBagInterface
@@ -29,8 +32,4 @@ interface TranslatorBagInterface
      * @throws InvalidArgumentException If the locale contains invalid characters
      */
     public function getCatalogue(string $locale = null);
-
-    public function getCatalogues(): array;
-
-    public function getDomains(): array;
 }
