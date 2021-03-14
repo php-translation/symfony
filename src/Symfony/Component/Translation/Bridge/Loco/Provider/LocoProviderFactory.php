@@ -49,7 +49,7 @@ final class LocoProviderFactory extends AbstractProviderFactory
     {
         if (self::SCHEME === $dsn->getScheme()) {
             $client = $this->client->withOptions([
-                'base_uri' => sprintf('%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : ''),
+                'base_uri' => sprintf('https://%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : ''),
                 'headers' => [
                     'Authorization' => 'Loco ' . $this->getUser($dsn),
                 ],

@@ -42,7 +42,7 @@ final class TranslationPullCommand extends Command
     private $transPaths;
     private $enabledLocales;
 
-    public function __construct(TranslationProviderCollection $providers, TranslationWriterInterface $writer, TranslationReaderInterface $reader, string $defaultLocale, string $defaultTransPath = null, array $transPaths = [], array $enabledLocales = [])
+    public function __construct(TranslationProviderCollection $providers, TranslationWriterInterface $writer, TranslationReaderInterface $reader, string $defaultLocale, array $transPaths = [], array $enabledLocales = [])
     {
         $this->providers = $providers;
         $this->writer = $writer;
@@ -50,10 +50,6 @@ final class TranslationPullCommand extends Command
         $this->defaultLocale = $defaultLocale;
         $this->transPaths = $transPaths;
         $this->enabledLocales = $enabledLocales;
-
-        if (null !== $defaultTransPath) {
-            $this->transPaths[] = $defaultTransPath;
-        }
 
         parent::__construct();
     }

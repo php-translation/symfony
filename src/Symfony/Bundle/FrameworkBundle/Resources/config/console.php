@@ -240,7 +240,6 @@ return static function (ContainerConfigurator $container) {
                 service('translation.writer'),
                 service('translation.reader'),
                 param('kernel.default_locale'),
-                param('translator.default_path'),
                 [], // Translator paths
                 [], // Enabled locales
             ])
@@ -250,7 +249,6 @@ return static function (ContainerConfigurator $container) {
             ->args([
                 service('translation.provider_collection'),
                 service('translation.reader'),
-                param('translator.default_path'),
                 [], // Translator paths
                 [], // Enabled locales
             ])

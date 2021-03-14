@@ -4,31 +4,48 @@ namespace Symfony\Component\Translation\Bridge\Crowdin\Tests;
 
 use Generator;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
-use ReflectionException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\Crowdin\Provider\CrowdinProvider;
+use Symfony\Component\Translation\Dumper\XliffFileDumper;
+use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CrowdinProviderTest extends TestCase
 {
     public function toStringDataProvider(): Generator
     {
+        $loader = $this->createMock(LoaderInterface::class);
+        $logger = $this->createMock(LoggerInterface::class);
+        $defaultLocale = 'en';
+        $xliffDumper = $this->createMock(XliffFileDumper::class);
+
         yield [
-            new CrowdinProvider('PROJECT_ID', 'API_TOKEN'),
+            new CrowdinProvider('PROJECT_ID', $this->createMock(HttpClientInterface::class)->withOptions([
+                'base_uri' => 'api.crowdin.com/api/v2',
+                'headers' => [
+                    'Authorization' => 'Bearer API_TOKEN',
+                ],
+            ]), $loader, $logger, $defaultLocale, $xliffDumper),
             'crowdin://api.crowdin.com/api/v2',
         ];
 
         yield [
-            (new CrowdinProvider('PROJECT_ID', 'API_TOKEN'))->setHost('crowdin.com'),
-            'crowdin://crowdin.com',
-        ];
-
-        yield [
-            (new CrowdinProvider('PROJECT_ID', 'API_TOKEN'))->setHost('example.com')->setPort(19),
+            new CrowdinProvider('PROJECT_ID', $this->createMock(HttpClientInterface::class)->withOptions([
+                'base_uri' => 'example.com:19',
+                'headers' => [
+                    'Authorization' => 'Bearer API_TOKEN',
+                ],
+            ]), $loader, $logger, $defaultLocale, $xliffDumper),
             'crowdin://example.com:19',
         ];
 
         yield [
-            (new CrowdinProvider('PROJECT_ID', 'API_TOKEN', 'organization')),
+            new CrowdinProvider('PROJECT_ID', $this->createMock(HttpClientInterface::class)->withOptions([
+                'base_uri' => 'organization.api.crowdin.com/api/v2',
+                'headers' => [
+                    'Authorization' => 'Bearer API_TOKEN',
+                ],
+            ]), $loader, $logger, $defaultLocale, $xliffDumper),
             'crowdin://organization.api.crowdin.com/api/v2',
         ];
     }
@@ -43,48 +60,13 @@ class CrowdinProviderTest extends TestCase
 
     public function testGetName()
     {
-        $this->assertSame('crowdin', (new CrowdinProvider('PROJECT_ID', 'API_TOKEN'))->getName());
-    }
+        $client = $this->createMock(HttpClientInterface::class)->withOptions([
+            'base_uri' => 'api.crowdin.com/api/v2',
+            'headers' => [
+                'Authorization' => 'Bearer API_TOKEN',
+            ],
+        ]);
 
-    public function getDefaultHostDataProvider(): Generator
-    {
-        yield [
-            new CrowdinProvider('PROJECT_ID', 'API_TOKEN', 'ORGANIZATION_DOMAIN'),
-            'ORGANIZATION_DOMAIN.api.crowdin.com/api/v2',
-        ];
-
-        yield [
-            new CrowdinProvider('PROJECT_ID', 'API_TOKEN'),
-            'api.crowdin.com/api/v2',
-        ];
-    }
-
-    /**
-     * @dataProvider getDefaultHostDataProvider
-     *
-     * @throws ReflectionException
-     */
-    public function testGetDefaultHost(CrowdinProvider $provider, string $expected)
-    {
-        $reflection = new ReflectionClass(\get_class($provider));
-        $method = $reflection->getMethod('getDefaultHost');
-        $method->setAccessible(true);
-
-        $actualResult = $method->invokeArgs($provider, []);
-
-        $this->assertSame($expected, $actualResult);
-    }
-
-    public function testGetDefaultHeaders()
-    {
-        $provider = new CrowdinProvider('PROJECT_ID', 'API_TOKEN');
-
-        $reflection = new ReflectionClass(\get_class($provider));
-        $method = $reflection->getMethod('getDefaultHeaders');
-        $method->setAccessible(true);
-
-        $actualResult = $method->invokeArgs($provider, []);
-
-        $this->assertSame(['Authorization' => 'Bearer API_TOKEN'], $actualResult);
+        $this->assertSame('crowdin', (new CrowdinProvider('PROJECT_ID', $client))->getName());
     }
 }

@@ -104,7 +104,7 @@ final class CrowdinProvider implements ProviderInterface
         return $translatorBag;
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
         foreach ($translatorBag->all() as $locale => $domainMessages) {
             if ($locale !== $this->defaultLocale) {
@@ -185,10 +185,8 @@ final class CrowdinProvider implements ProviderInterface
             ],
         ]);
 
-        $responseContent = $response->getContent(false);
-
         if (201 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add a File in Crowdin for domain "%s": "%s".', $domain, $responseContent), $response);
+            throw new ProviderException(sprintf('Unable to add a file in Crowdin for domain "%s": "%s".', $domain, $response->getContent(false)), $response);
         }
     }
 
@@ -256,8 +254,7 @@ final class CrowdinProvider implements ProviderInterface
             throw new ProviderException(sprintf('Unable to export file %d translations for language "%s".', $fileId, $languageId), $response);
         }
 
-        $export = json_decode($response->getContent(), true);
-
+        $export = $response->toArray();
         $exportResponse = $this->client->request('GET', $export['data']['url']);
 
         if (200 !== $exportResponse->getStatusCode()) {
@@ -279,8 +276,7 @@ final class CrowdinProvider implements ProviderInterface
             throw new ProviderException(sprintf('Unable to download source file %d.', $fileId), $response);
         }
 
-        $export = json_decode($response->getContent(), true);
-
+        $export = $response->toArray();
         $exportResponse = $this->client->request('GET', $export['data']['url']);
 
         if (200 !== $exportResponse->getStatusCode()) {
@@ -305,10 +301,10 @@ final class CrowdinProvider implements ProviderInterface
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to list strings for file %d in project %d. Message: "%s".', $fileId, $this->projectId, $response->getContent()), $response);
+            throw new ProviderException(sprintf('Unable to list strings for file %d in project %d: "%s".', $fileId, $this->projectId, $response->getContent(false)), $response);
         }
 
-        return json_decode($response->getContent(), true)['data'];
+        return $response->toArray()['data'];
     }
 
     private function deleteString(int $stringId): void
@@ -324,7 +320,7 @@ final class CrowdinProvider implements ProviderInterface
         }
 
         if (204 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to delete string %d in project %d. Message: "%s".', $stringId, $this->projectId, $response->getContent()), $response);
+            throw new ProviderException(sprintf('Unable to delete string %d in project %d: "%s".', $stringId, $this->projectId, $response->getContent(false)), $response);
         }
     }
 
@@ -346,9 +342,7 @@ final class CrowdinProvider implements ProviderInterface
             throw new ProviderException(sprintf('Unable to add a Storage in Crowdin for domain "%s".', $domain), $response);
         }
 
-        $storage = json_decode($response->getContent(), true);
-
-        return $storage['data']['id'];
+        return $response->toArray()['data']['id'];
     }
 
     private function getFilesList(): array
@@ -367,6 +361,6 @@ final class CrowdinProvider implements ProviderInterface
             throw new ProviderException('Unable to list Crowdin files.', $response);
         }
 
-        return json_decode($response->getContent(), true)['data'];
+        return $response->toArray()['data'];
     }
 }

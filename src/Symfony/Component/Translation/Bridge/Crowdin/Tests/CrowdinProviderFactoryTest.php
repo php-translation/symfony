@@ -78,6 +78,6 @@ class CrowdinProviderFactoryTest extends TestCase
 
     private function createFactory(): CrowdinProviderFactory
     {
-        return new CrowdinProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class), $this->createMock(XliffFileDumper::class));
+        return new CrowdinProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class), 'en', $this->createMock(LoaderInterface::class), $this->createMock(XliffFileDumper::class));
     }
 }

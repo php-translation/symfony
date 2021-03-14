@@ -38,16 +38,12 @@ final class TranslationPushCommand extends Command
     private $transPaths;
     private $enabledLocales;
 
-    public function __construct(TranslationProviderCollection $providers, TranslationReaderInterface $reader, string $defaultTransPath = null, array $transPaths = [], array $enabledLocales = [])
+    public function __construct(TranslationProviderCollection $providers, TranslationReaderInterface $reader, array $transPaths = [], array $enabledLocales = [])
     {
         $this->providers = $providers;
         $this->reader = $reader;
         $this->transPaths = $transPaths;
         $this->enabledLocales = $enabledLocales;
-
-        if (null !== $defaultTransPath) {
-            $this->transPaths[] = $defaultTransPath;
-        }
 
         parent::__construct();
     }

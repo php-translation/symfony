@@ -1,5 +1,5 @@
 {
-    "name": "symfony/po-editor-translation-bridge",
+    "name": "symfony/po-editor-translation",
     "type": "symfony-bridge",
     "description": "Symfony PoEditor Translation Bridge",
     "keywords": ["poeditor", "translation", "provider"],

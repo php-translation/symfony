@@ -59,7 +59,7 @@ final class CrowdinProviderFactory extends AbstractProviderFactory
             }
 
             $client = $this->client->withOptions([
-                'base_uri' => sprintf('%s%s', $host, $dsn->getPort() ? ':'.$dsn->getPort() : ''),
+                'base_uri' => sprintf('https://%s%s', $host, $dsn->getPort() ? ':'.$dsn->getPort() : ''),
                 'headers' => [
                     'Authorization' => 'Bearer '.$this->getPassword($dsn),
                 ],

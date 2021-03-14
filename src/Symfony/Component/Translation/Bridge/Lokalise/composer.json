@@ -1,5 +1,5 @@
 {
-    "name": "symfony/lokalise-translation-bridge",
+    "name": "symfony/lokalise-translation",
     "type": "symfony-bridge",
     "description": "Symfony Lokalise Translation Bridge",
     "keywords": ["lokalise", "translation", "provider"],

@@ -1,5 +1,5 @@
 {
-    "name": "symfony/loco-translation-bridge",
+    "name": "symfony/loco-translation",
     "type": "symfony-bridge",
     "description": "Symfony Loco Translation Bridge",
     "keywords": ["loco", "translation", "provider"],

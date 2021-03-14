@@ -47,7 +47,7 @@ class FilteringProvider implements ProviderInterface
         $this->provider->write($translatorBag);
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         $domains = !$this->domains ? $domains : array_intersect($this->domains, $domains);
         $locales = array_intersect($this->locales, $locales);
@@ -55,7 +55,7 @@ class FilteringProvider implements ProviderInterface
         return $this->provider->read($domains, $locales);
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
         $this->provider->delete($translatorBag);
     }

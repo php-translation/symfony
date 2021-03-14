@@ -14,14 +14,13 @@ namespace Symfony\Bundle\FrameworkBundle\Command;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBag;
-use Symfony\Component\Translation\TranslatorBagInterface;
 
 /**
  * @internal
  */
 trait TranslationTrait
 {
-    private function readLocalTranslations(array $locales, array $domains, array $transPaths): TranslatorBagInterface
+    private function readLocalTranslations(array $locales, array $domains, array $transPaths): TranslatorBag
     {
         $bag = new TranslatorBag();
 

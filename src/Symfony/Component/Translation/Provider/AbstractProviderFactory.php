@@ -19,7 +19,7 @@ abstract class AbstractProviderFactory implements ProviderFactoryInterface
 {
     public function supports(Dsn $dsn): bool
     {
-        return \in_array($dsn->getScheme(), $this->getSupportedSchemes());
+        return \in_array($dsn->getScheme(), $this->getSupportedSchemes(), true);
     }
 
     /**

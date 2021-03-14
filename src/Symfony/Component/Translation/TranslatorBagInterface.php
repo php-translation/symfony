@@ -18,6 +18,7 @@ use Symfony\Component\Translation\Exception\InvalidArgumentException;
  *
  * @method array getCatalogues() Returns all catalogues of the instance
  * @method array getDomains() Returns all unique domains of the instance
+ * @method array all() Returns all messages of the instance
  *
  * @author Abdellatif Ait boudad <a.aitboudad@gmail.com>
  */
@@ -25,7 +26,6 @@ interface TranslatorBagInterface
 {
     /**
      * Gets the catalogue by locale.
-     *
      * @param string|null $locale The locale or null to use the default
      * @return MessageCatalogueInterface
      *

@@ -1284,14 +1284,14 @@ class FrameworkExtension extends Extension
         if ($config['providers']) {
             $isLocalesParameterDefined = false;
             foreach ($config['providers'] as $provider) {
-                if (\array_key_exists('locales', $provider) && $provider['locales']) {
+                if ($provider['locales']) {
                     $isLocalesParameterDefined = true;
                     break;
                 }
             }
 
             if (!$config['enabled_locales'] && !$isLocalesParameterDefined) {
-                throw new LogicException('You must specify framework.translator.enabled_locales or framework.translator.providers.{provider_name}.locales in order to use translation providers.');
+                throw new LogicException('You must specify "framework.translator.enabled_locales" or "framework.translator.providers.{provider_name}.locales" in order to use translation providers.');
             }
 
             $container->getDefinition('console.command.translation_pull')
@@ -1317,8 +1317,17 @@ class FrameworkExtension extends Extension
                 CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
             ];
 
+            $parentPackages = ['symfony/framework-bundle', 'symfony/translation'];
+
             foreach ($classToServices as $class => $service) {
-                if (!class_exists($class)) {
+                switch ($package = substr($service, \strlen('translation.provider_factory.'))) {
+                    case 'loco': $package = 'loco'; break;
+                    case 'poeditor': $package = 'po-editor'; break;
+                    case 'lokalise': $package = 'lokalise'; break;
+                    case 'crowdin': $package = 'crowdin'; break;
+                }
+
+                if (!ContainerBuilder::willBeAvailable(sprintf('symfony/%s-translation', $package), $class, $parentPackages)) {
                     $container->removeDefinition($service);
                 }
             }

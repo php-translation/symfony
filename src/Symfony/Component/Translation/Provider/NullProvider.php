@@ -35,12 +35,12 @@ class NullProvider implements ProviderInterface
     {
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         return new TranslatorBag();
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
     }
 

@@ -106,13 +106,13 @@ final class PoEditorProvider implements ProviderInterface
                 ],
              ]);
 
-            $exportResponseContent = $exportResponse->getContent(false);
+            $exportResponseContent = $exportResponse->toArray(false);
 
             if (200 !== $exportResponse->getStatusCode()) {
-                throw new ProviderException('Unable to read the PoEditor response: '.$exportResponseContent, $exportResponse);
+                throw new ProviderException('Unable to read the PoEditor response: '.$exportResponse->getContent(false), $exportResponse);
             }
 
-            $response = $this->client->request('GET', json_decode($exportResponseContent, true)['result']['url']);
+            $response = $this->client->request('GET', $exportResponseContent['result']['url']);
 
             foreach ($domains as $domain) {
                 $translatorBag->addCatalogue($this->loader->load($response->getContent(), $locale, $domain));
@@ -122,14 +122,14 @@ final class PoEditorProvider implements ProviderInterface
         return $translatorBag;
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
         $deletedIds = $termsToDelete = [];
 
         foreach ($translatorBag->all() as $domainMessages) {
             foreach ($domainMessages as $messages) {
                 foreach ($messages as $id => $message) {
-                    if (\in_array($id, $deletedIds)) {
+                    if (\in_array($id, $deletedIds, true)) {
                         continue;
                     }
 

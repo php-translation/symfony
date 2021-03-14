@@ -73,7 +73,7 @@ final class LokaliseProvider implements ProviderInterface
                     $intlDomain .= MessageCatalogue::INTL_DOMAIN_SUFFIX;
                 }
 
-                if (\in_array($intlDomain, $domains)) {
+                if (\in_array($intlDomain, $domains, true)) {
                     $translatorBag->addCatalogue($this->loader->load($content['content'], $locale, $intlDomain));
                 } else {
                     $this->logger->info(sprintf('The translations fetched from Lokalise under the filename "%s" does not match with any domains of your application.', $filename));
@@ -84,7 +84,7 @@ final class LokaliseProvider implements ProviderInterface
         return $translatorBag;
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
         $catalogue = $translatorBag->getCatalogue($this->defaultLocale);
 
@@ -177,18 +177,19 @@ final class LokaliseProvider implements ProviderInterface
             ],
         ]);
 
-        $responseContent = $response->getContent(false);
+        $responseContent = $response->toArray(false);
 
         if (406 === $response->getStatusCode()
-            && 'No keys found with specified filenames.' === json_decode($responseContent, true)['error']['message']) {
+            && 'No keys found with specified filenames.' === $responseContent['error']['message']
+        ) {
             return [];
         }
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to export translations from Lokalise: "%s".', $responseContent), $response);
+            throw new ProviderException(sprintf('Unable to export translations from Lokalise: "%s".', $response->getContent(false)), $response);
         }
 
-        return json_decode($responseContent, true)['files'];
+        return $responseContent['files'];
     }
 
     private function getKeysIds(array $keys, string $domain): array
@@ -200,13 +201,13 @@ final class LokaliseProvider implements ProviderInterface
             ],
         ]);
 
-        $responseContent = $response->getContent(false);
+        $responseContent = $response->toArray(false);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to get keys ids from Lokalise: "%s".', $responseContent), $response);
+            throw new ProviderException(sprintf('Unable to get keys ids from Lokalise: "%s".', $response->getContent(false)), $response);
         }
 
-        return array_reduce(json_decode($responseContent, true)['keys'], function ($keysIds, array $keyItem) {
+        return array_reduce($responseContent['keys'], function ($keysIds, array $keyItem) {
             $keysIds[] = $keyItem['key_id'];
 
             return $keysIds;

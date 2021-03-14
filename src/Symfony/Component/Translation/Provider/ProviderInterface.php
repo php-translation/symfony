@@ -26,7 +26,7 @@ interface ProviderInterface
      */
     public function write(TranslatorBagInterface $translatorBag): void;
 
-    public function read(array $domains, array $locales): TranslatorBag;
+    public function read(array $domains, array $locales): TranslatorBagInterface;
 
-    public function delete(TranslatorBag $translatorBag): void;
+    public function delete(TranslatorBagInterface $translatorBag): void;
 }

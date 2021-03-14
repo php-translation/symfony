@@ -101,14 +101,14 @@ final class LocoProvider implements ProviderInterface
         return $translatorBag;
     }
 
-    public function delete(TranslatorBag $translatorBag): void
+    public function delete(TranslatorBagInterface $translatorBag): void
     {
         $deletedIds = [];
 
         foreach ($translatorBag->all() as $domainMessages) {
             foreach ($domainMessages as $messages) {
                 foreach ($messages as $id => $message) {
-                    if (\in_array($id, $deletedIds)) {
+                    if (\in_array($id, $deletedIds, true)) {
                         continue;
                     }
 
@@ -155,7 +155,7 @@ final class LocoProvider implements ProviderInterface
     {
         $idsAsString = implode(',', array_unique($ids));
 
-        if (!\in_array($tag, $this->getTags())) {
+        if (!\in_array($tag, $this->getTags(), true)) {
             $this->createTag($tag);
         }
 
@@ -184,13 +184,13 @@ final class LocoProvider implements ProviderInterface
     private function getTags(): array
     {
         $response = $this->client->request('GET', '/tags.json');
-        $content = $response->getContent(false);
+        $content = $response->toArray(false);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to get tags on Loco: "%s".', $content), $response);
+            throw new ProviderException(sprintf('Unable to get tags on Loco: "%s".', $response->getContent(false)), $response);
         }
 
-        return json_decode($content) ?: [];
+        return $content ?: [];
     }
 
     private function deleteAsset(string $id): void
