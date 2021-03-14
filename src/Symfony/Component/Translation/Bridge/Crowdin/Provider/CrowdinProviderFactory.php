@@ -28,7 +28,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CrowdinProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'crowdin';
-    private const HOST = 'api.crowdin.com/api/v2';
+    public const HOST = 'api.crowdin.com/api/v2';
     private const DSN_OPTION_DOMAIN = 'domain';
 
     private $client;
@@ -58,14 +58,16 @@ final class CrowdinProviderFactory extends AbstractProviderFactory
                 $host = self::HOST;
             }
 
+            $endpoint = sprintf('%s%s', $host, $dsn->getPort() ? ':'.$dsn->getPort() : '');
+
             $client = $this->client->withOptions([
-                'base_uri' => sprintf('https://%s%s', $host, $dsn->getPort() ? ':'.$dsn->getPort() : ''),
+                'base_uri' => 'https://'.$endpoint,
                 'headers' => [
                     'Authorization' => 'Bearer '.$this->getPassword($dsn),
                 ],
             ]);
 
-            return new CrowdinProvider($this->getUser($dsn), $client, $this->loader, $this->logger, $this->defaultLocale, $this->xliffFileDumper);
+            return new CrowdinProvider($this->getUser($dsn), $client, $this->loader, $this->logger, $this->defaultLocale, $this->xliffFileDumper, $endpoint);
         }
 
         throw new UnsupportedSchemeException($dsn, self::SCHEME, $this->getSupportedSchemes());

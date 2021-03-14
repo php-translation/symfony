@@ -37,14 +37,21 @@ final class LokaliseProvider implements ProviderInterface
     private $loader;
     private $logger;
     private $defaultLocale;
+    private $endpoint;
 
-    public function __construct(string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale)
+    public function __construct(string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, string $endpoint)
     {
         $this->projectId = $projectId;
         $this->client = $client;
         $this->loader = $loader;
         $this->logger = $logger;
         $this->defaultLocale = $defaultLocale;
+        $this->endpoint = $endpoint;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s://%s', LokaliseProviderFactory::SCHEME, $this->endpoint);
     }
 
     public function getName(): string
@@ -60,7 +67,7 @@ final class LokaliseProvider implements ProviderInterface
         $this->createKeysWithTranslations($translatorBag);
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         $translatorBag = new TranslatorBag();
         $translations = $this->exportFiles($locales, $domains);

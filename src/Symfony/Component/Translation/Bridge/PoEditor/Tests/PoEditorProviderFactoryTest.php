@@ -4,56 +4,44 @@ namespace Symfony\Component\Translation\Bridge\PoEditor\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Translation\Bridge\Lokalise\Provider\LokaliseProviderFactory;
 use Symfony\Component\Translation\Bridge\PoEditor\Provider\PoEditorProviderFactory;
 use Symfony\Component\Translation\Exception\IncompleteDsnException;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Provider\Dsn;
+use Symfony\Component\Translation\Provider\ProviderFactoryInterface;
+use Symfony\Component\Translation\Tests\ProviderFactoryTestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class PoEditorProviderFactoryTest extends TestCase
+class PoEditorProviderFactoryTest extends ProviderFactoryTestCase
 {
-    public function testCreateWithDsn()
+    public function supportsProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $provider = $factory->create(Dsn::fromString('poeditor://PROJECT_ID:API_KEY@default'));
-
-        $this->assertSame('poeditor://api.poeditor.com/v2', (string) $provider);
+        yield [true, 'poeditor://PROJECT_ID:API_KEY@default'];
+        yield [false, 'somethingElse://PROJECT_ID:API_KEY@default'];
     }
 
-    public function testCreateWithNoApiKeyThrowsIncompleteDsnException()
+    public function unsupportedSchemeProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $this->expectException(IncompleteDsnException::class);
-        $factory->create(Dsn::fromString('poeditor://default'));
+        yield ['somethingElse://PROJECT_ID:API_KEY@default'];
     }
 
-    public function testSupportsReturnsTrueWithSupportedScheme()
+    public function createProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $this->assertTrue($factory->supports(Dsn::fromString('poeditor://PROJECT_ID:API_KEY@default')));
+        yield [
+            'poeditor://api.poeditor.com/v2',
+            'poeditor://PROJECT_ID:API_KEY@default',
+        ];
     }
 
-    public function testSupportsReturnsFalseWithUnsupportedScheme()
+    public function incompleteDsnProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $this->assertFalse($factory->supports(Dsn::fromString('somethingElse://PROJECT_ID:API_KEY@default')));
+        yield ['poeditor://default'];
     }
 
-    public function testUnsupportedSchemeThrowsUnsupportedSchemeException()
+    public function createFactory(): ProviderFactoryInterface
     {
-        $factory = $this->createFactory();
-
-        $this->expectException(UnsupportedSchemeException::class);
-        $factory->create(Dsn::fromString('somethingElse://PROJECT_ID:API_KEY@default'));
-    }
-
-    private function createFactory(): PoEditorProviderFactory
-    {
-        return new PoEditorProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class),'en', $this->createMock(LoaderInterface::class));
+        return new PoEditorProviderFactory($this->getClient(), $this->getLogger(), $this->getDefaultLocale(), $this->getLoader(), $this->getXliffFileDumper());
     }
 }

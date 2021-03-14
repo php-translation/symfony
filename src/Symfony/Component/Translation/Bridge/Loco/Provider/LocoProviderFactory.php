@@ -48,14 +48,15 @@ final class LocoProviderFactory extends AbstractProviderFactory
     public function create(Dsn $dsn): ProviderInterface
     {
         if (self::SCHEME === $dsn->getScheme()) {
+            $endpoint = sprintf('%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : '');
             $client = $this->client->withOptions([
-                'base_uri' => sprintf('https://%s%s', 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost(), $dsn->getPort() ? ':' . $dsn->getPort() : ''),
+                'base_uri' => 'https://' . $endpoint,
                 'headers' => [
                     'Authorization' => 'Loco ' . $this->getUser($dsn),
                 ],
             ]);
 
-            return new LocoProvider($client, $this->loader, $this->logger, $this->defaultLocale);
+            return new LocoProvider($client, $this->loader, $this->logger, $this->defaultLocale, $endpoint);
         }
 
         throw new UnsupportedSchemeException($dsn, self::SCHEME, $this->getSupportedSchemes());

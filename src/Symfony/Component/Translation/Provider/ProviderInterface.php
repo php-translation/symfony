@@ -11,11 +11,12 @@
 
 namespace Symfony\Component\Translation\Provider;
 
-use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Component\Translation\TranslatorBagInterface;
 
 interface ProviderInterface
 {
+    public function __toString(): string;
+
     public function getName(): string;
 
     /**

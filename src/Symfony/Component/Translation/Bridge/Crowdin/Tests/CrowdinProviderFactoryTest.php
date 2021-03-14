@@ -2,82 +2,46 @@
 
 namespace Symfony\Component\Translation\Bridge\Crowdin\Tests;
 
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Bridge\Crowdin\Provider\CrowdinProviderFactory;
-use Symfony\Component\Translation\Dumper\XliffFileDumper;
-use Symfony\Component\Translation\Exception\IncompleteDsnException;
-use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
-use Symfony\Component\Translation\Loader\LoaderInterface;
-use Symfony\Component\Translation\Provider\Dsn;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Translation\Provider\ProviderFactoryInterface;
+use Symfony\Component\Translation\Tests\ProviderFactoryTestCase;
 
-class CrowdinProviderFactoryTest extends TestCase
+class CrowdinProviderFactoryTest extends ProviderFactoryTestCase
 {
-    public function testCreateWithDsn()
+    public function supportsProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $provider = $factory->create(Dsn::fromString('crowdin://PROJECT_ID:API_TOKEN@default'));
-
-        $this->assertSame('crowdin://api.crowdin.com/api/v2', (string) $provider);
+        yield [true, 'crowdin://PROJECT_ID:API_TOKEN@default'];
+        yield [true, 'crowdin://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN'];
+        yield [false, 'somethingElse://PROJECT_ID:API_TOKEN@default'];
+        yield [false, 'somethingElse://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN'];
     }
 
-    public function testCreateWithOrganizationDsn()
+    public function unsupportedSchemeProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $provider = $factory->create(Dsn::fromString('crowdin://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN'));
-
-        $this->assertSame('crowdin://ORGANIZATION_DOMAIN.api.crowdin.com/api/v2', (string) $provider);
+        yield ['somethingElse://PROJECT_ID:API_TOKEN@default'];
+        yield ['somethingElse://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN'];
     }
 
-    public function testCreateWithNoApiKeyThrowsIncompleteDsnException()
+    public function createProvider(): iterable
     {
-        $factory = $this->createFactory();
+        yield [
+            'crowdin://api.crowdin.com/api/v2',
+            'crowdin://PROJECT_ID:API_TOKEN@default',
+        ];
 
-        $this->expectException(IncompleteDsnException::class);
-        $factory->create(Dsn::fromString('crowdin://default'));
+        yield [
+            'crowdin://ORGANIZATION_DOMAIN.api.crowdin.com/api/v2',
+            'crowdin://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN',
+        ];
     }
 
-    public function testSupportsReturnsTrueWithSupportedScheme()
+    public function incompleteDsnProvider(): iterable
     {
-        $factory = $this->createFactory();
-
-        $this->assertTrue($factory->supports(Dsn::fromString('crowdin://PROJECT_ID:API_TOKEN@default')));
+        yield ['crowdin://default'];
     }
 
-    public function testSupportsReturnsTrueWithSupportedSchemeEnterprise()
+    public function createFactory(): ProviderFactoryInterface
     {
-        $factory = $this->createFactory();
-
-        $this->assertTrue($factory->supports(Dsn::fromString('crowdin://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN')));
-    }
-
-    public function testSupportsReturnsFalseWithUnsupportedScheme()
-    {
-        $factory = $this->createFactory();
-
-        $this->assertFalse($factory->supports(Dsn::fromString('somethingElse://PROJECT_ID:API_TOKEN@default')));
-    }
-
-    public function testSupportsReturnsFalseWithUnsupportedSchemeEnterprise()
-    {
-        $factory = $this->createFactory();
-
-        $this->assertFalse($factory->supports(Dsn::fromString('somethingElse://PROJECT_ID:API_TOKEN@default?domain=ORGANIZATION_DOMAIN')));
-    }
-
-    public function testUnsupportedSchemeThrowsUnsupportedSchemeException()
-    {
-        $factory = $this->createFactory();
-
-        $this->expectException(UnsupportedSchemeException::class);
-        $factory->create(Dsn::fromString('somethingElse://PROJECT_ID:API_TOKEN@default'));
-    }
-
-    private function createFactory(): CrowdinProviderFactory
-    {
-        return new CrowdinProviderFactory($this->createMock(HttpClientInterface::class), $this->createMock(LoggerInterface::class), 'en', $this->createMock(LoaderInterface::class), $this->createMock(XliffFileDumper::class));
+        return new CrowdinProviderFactory($this->getClient(), $this->getLogger(), $this->getDefaultLocale(), $this->getLoader(), $this->getXliffFileDumper());
     }
 }

@@ -23,6 +23,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class NullProviderFactory extends AbstractProviderFactory
 {
     const SCHEME = 'null';
+    protected const HOST = 'null';
 
     protected $client;
     protected $logger;

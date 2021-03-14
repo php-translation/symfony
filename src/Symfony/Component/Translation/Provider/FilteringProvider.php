@@ -34,6 +34,11 @@ class FilteringProvider implements ProviderInterface
         $this->domains = $domains;
     }
 
+    public function __toString(): string
+    {
+        return (string) $this->provider;
+    }
+
     public function getName(): string
     {
         return $this->provider->getName();

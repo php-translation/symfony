@@ -41,8 +41,9 @@ final class CrowdinProvider implements ProviderInterface
     private $defaultLocale;
     private $xliffFileDumper;
     private $files = [];
+    private $endpoint;
 
-    public function __construct(string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, XliffFileDumper $xliffFileDumper)
+    public function __construct(string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, XliffFileDumper $xliffFileDumper, string $endpoint)
     {
         $this->projectId = $projectId;
         $this->client = $client;
@@ -50,6 +51,12 @@ final class CrowdinProvider implements ProviderInterface
         $this->logger = $logger;
         $this->defaultLocale = $defaultLocale;
         $this->xliffFileDumper = $xliffFileDumper;
+        $this->endpoint = $endpoint;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s://%s', CrowdinProviderFactory::SCHEME, $this->endpoint);
     }
 
     public function getName(): string
@@ -79,7 +86,7 @@ final class CrowdinProvider implements ProviderInterface
         }
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         $translatorBag = new TranslatorBag();
 

@@ -37,8 +37,9 @@ final class PoEditorProvider implements ProviderInterface
     private $loader;
     private $logger;
     private $defaultLocale;
+    private $endpoint;
 
-    public function __construct(string $apiKey, string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale)
+    public function __construct(string $apiKey, string $projectId, HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, string $endpoint)
     {
         $this->apiKey = $apiKey;
         $this->projectId = $projectId;
@@ -46,6 +47,12 @@ final class PoEditorProvider implements ProviderInterface
         $this->loader = $loader;
         $this->logger = $logger;
         $this->defaultLocale = $defaultLocale;
+        $this->endpoint = $endpoint;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s://%s', PoEditorProviderFactory::SCHEME, $this->endpoint);
     }
 
     public function getName(): string
@@ -90,7 +97,7 @@ final class PoEditorProvider implements ProviderInterface
         $this->addTranslations($translations[$defaultCatalogue->getLocale()], $defaultCatalogue->getLocale());
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         $translatorBag = new TranslatorBag();
 

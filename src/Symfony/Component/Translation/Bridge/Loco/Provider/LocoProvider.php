@@ -35,13 +35,20 @@ final class LocoProvider implements ProviderInterface
     private $loader;
     private $logger;
     private $defaultLocale;
+    private $endpoint;
 
-    public function __construct(HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale)
+    public function __construct(HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, string $endpoint)
     {
         $this->client = $client;
         $this->loader = $loader;
         $this->logger = $logger;
         $this->defaultLocale = $defaultLocale;
+        $this->endpoint = $endpoint;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s://%s', LocoProviderFactory::SCHEME, $this->endpoint);
     }
 
     public function getName(): string
@@ -80,7 +87,7 @@ final class LocoProvider implements ProviderInterface
         }
     }
 
-    public function read(array $domains, array $locales): TranslatorBag
+    public function read(array $domains, array $locales): TranslatorBagInterface
     {
         $filter = $domains ? implode(',', $domains) : '*';
         $translatorBag = new TranslatorBag();

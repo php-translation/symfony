@@ -24,8 +24,6 @@ use Symfony\Component\Translation\TranslatorBagInterface;
  */
 class NullProvider implements ProviderInterface
 {
-    protected const HOST = 'null';
-
     public function __toString(): string
     {
         return NullProviderFactory::SCHEME . '://default';
