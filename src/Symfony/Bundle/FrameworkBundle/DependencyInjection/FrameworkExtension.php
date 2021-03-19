@@ -1281,58 +1281,6 @@ class FrameworkExtension extends Extension
             $container->getDefinition('console.command.translation_update')->replaceArgument(6, $transPaths);
         }
 
-        if ($config['providers']) {
-            $isLocalesParameterDefined = false;
-            foreach ($config['providers'] as $provider) {
-                if ($provider['locales']) {
-                    $isLocalesParameterDefined = true;
-                    break;
-                }
-            }
-
-            if (!$config['enabled_locales'] && !$isLocalesParameterDefined) {
-                throw new LogicException('You must specify "framework.translator.enabled_locales" or "framework.translator.providers.{provider_name}.locales" in order to use translation providers.');
-            }
-
-            $container->getDefinition('console.command.translation_pull')
-                ->replaceArgument(5, $transPaths)
-                ->replaceArgument(6, $config['enabled_locales'])
-            ;
-
-            $container->getDefinition('console.command.translation_push')
-                ->replaceArgument(3, $transPaths)
-                ->replaceArgument(4, $config['enabled_locales'])
-            ;
-
-            $container->getDefinition('translation.provider_collection_factory')
-                ->replaceArgument(1, $config['enabled_locales'])
-            ;
-
-            $container->getDefinition('translation.provider_collection')->setArgument(0, $config['providers']);
-
-            $classToServices = [
-                LocoProviderFactory::class => 'translation.provider_factory.loco',
-                PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
-                LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
-                CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
-            ];
-
-            $parentPackages = ['symfony/framework-bundle', 'symfony/translation'];
-
-            foreach ($classToServices as $class => $service) {
-                switch ($package = substr($service, \strlen('translation.provider_factory.'))) {
-                    case 'loco': $package = 'loco'; break;
-                    case 'poeditor': $package = 'po-editor'; break;
-                    case 'lokalise': $package = 'lokalise'; break;
-                    case 'crowdin': $package = 'crowdin'; break;
-                }
-
-                if (!ContainerBuilder::willBeAvailable(sprintf('symfony/%s-translation', $package), $class, $parentPackages)) {
-                    $container->removeDefinition($service);
-                }
-            }
-        }
-
         if ($container->fileExists($defaultDir)) {
             $dirs[] = $defaultDir;
         } else {
@@ -1393,6 +1341,58 @@ class FrameworkExtension extends Extension
                     new Reference('translator.pseudo.inner'),
                     $options,
                 ]);
+        }
+
+        if ($config['providers']) {
+            $isLocalesParameterDefined = false;
+            foreach ($config['providers'] as $provider) {
+                if ($provider['locales']) {
+                    $isLocalesParameterDefined = true;
+                    break;
+                }
+            }
+
+            if (!$config['enabled_locales'] && !$isLocalesParameterDefined) {
+                throw new LogicException('You must specify "framework.translator.enabled_locales" or "framework.translator.providers.{provider_name}.locales" in order to use translation providers.');
+            }
+
+            $container->getDefinition('console.command.translation_pull')
+                ->replaceArgument(4, array_merge($transPaths, [$config['default_path']]))
+                ->replaceArgument(5, $config['enabled_locales'])
+            ;
+
+            $container->getDefinition('console.command.translation_push')
+                ->replaceArgument(2, array_merge($transPaths, [$config['default_path']]))
+                ->replaceArgument(3, $config['enabled_locales'])
+            ;
+
+            $container->getDefinition('translation.provider_collection_factory')
+                ->replaceArgument(1, $config['enabled_locales'])
+            ;
+
+            $container->getDefinition('translation.provider_collection')->setArgument(0, $config['providers']);
+
+            $classToServices = [
+                LocoProviderFactory::class => 'translation.provider_factory.loco',
+                PoEditorProviderFactory::class => 'translation.provider_factory.poeditor',
+                LokaliseProviderFactory::class => 'translation.provider_factory.lokalise',
+                CrowdinProviderFactory::class => 'translation.provider_factory.crowdin',
+            ];
+
+            $parentPackages = ['symfony/framework-bundle', 'symfony/translation'];
+
+            foreach ($classToServices as $class => $service) {
+                switch ($package = substr($service, \strlen('translation.provider_factory.'))) {
+                    case 'loco': $package = 'loco'; break;
+                    case 'poeditor': $package = 'po-editor'; break;
+                    case 'lokalise': $package = 'lokalise'; break;
+                    case 'crowdin': $package = 'crowdin'; break;
+                }
+
+                if (!ContainerBuilder::willBeAvailable(sprintf('symfony/%s-translation', $package), $class, $parentPackages)) {
+                    $container->removeDefinition($service);
+                }
+            }
         }
     }
 

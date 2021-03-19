@@ -27,7 +27,7 @@ final class TranslatorBag implements TranslatorBagInterface
         $this->catalogues[$catalogue->getLocale()] = $catalogue;
     }
 
-    public function addBag(self $bag): void
+    public function addBag(TranslatorBagInterface $bag): void
     {
         foreach ($bag->getCatalogues() as $catalogue) {
             $this->addCatalogue($catalogue);
@@ -72,7 +72,7 @@ final class TranslatorBag implements TranslatorBagInterface
         return array_values($this->catalogues);
     }
 
-    public function diff(self $diffBag): self
+    public function diff(TranslatorBagInterface $diffBag): self
     {
         $diff = new self();
 
@@ -91,7 +91,7 @@ final class TranslatorBag implements TranslatorBagInterface
         return $diff;
     }
 
-    public function intersect(self $intersectBag): self
+    public function intersect(TranslatorBagInterface $intersectBag): self
     {
         $diff = new self();
 

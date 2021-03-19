@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class LokaliseProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'lokalise';
-    private const HOST = 'api.lokalise.com/api2';
+    private const HOST = 'api.lokalise.com/api2/';
 
     private $client;
     private $logger;

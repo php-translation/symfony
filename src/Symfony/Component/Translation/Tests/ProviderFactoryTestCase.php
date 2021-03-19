@@ -120,7 +120,7 @@ abstract class ProviderFactoryTestCase extends TestCase
 
     protected function getClient(): HttpClientInterface
     {
-        return $this->client ?? $this->client = $this->createMock(MockHttpClient::class);
+        return $this->client ?? $this->client = new MockHttpClient();
     }
 
     protected function getLogger(): LoggerInterface

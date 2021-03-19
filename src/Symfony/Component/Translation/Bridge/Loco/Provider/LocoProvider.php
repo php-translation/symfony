@@ -79,6 +79,11 @@ final class LocoProvider implements ProviderInterface
         // Push translations in all locales and tag them with domain
         foreach ($translatorBag->getCatalogues() as $catalogue) {
             $locale = $catalogue->getLocale();
+
+            if (!\in_array($locale, $this->getLocales())) {
+                $this->createLocale($locale);
+            }
+
             foreach ($catalogue->all() as $messages) {
                 foreach ($messages as $id => $message) {
                     $this->translateAsset($id, $message, $locale);
@@ -89,18 +94,18 @@ final class LocoProvider implements ProviderInterface
 
     public function read(array $domains, array $locales): TranslatorBagInterface
     {
-        $filter = $domains ? implode(',', $domains) : '*';
+        $domains = $domains ?? ['*'];
         $translatorBag = new TranslatorBag();
 
         foreach ($locales as $locale) {
-            $response = $this->client->request('GET', sprintf('/export/locale/%s.xlf?filter=%s', $locale, $filter));
-            $responseContent = $response->getContent(false);
-
-            if (200 !== $response->getStatusCode()) {
-                throw new ProviderException('Unable to read the Loco response: '.$responseContent, $response);
-            }
-
             foreach ($domains as $domain) {
+                $response = $this->client->request('GET', sprintf('export/locale/%s.xlf?filter=%s', $locale, $domain));
+                $responseContent = $response->getContent(false);
+
+                if (200 !== $response->getStatusCode()) {
+                    throw new ProviderException('Unable to read the Loco response: '.$responseContent, $response);
+                }
+
                 $translatorBag->addCatalogue($this->loader->load($responseContent, $locale, $domain));
             }
         }
@@ -129,7 +134,7 @@ final class LocoProvider implements ProviderInterface
 
     private function createAsset(string $id): void
     {
-        $response = $this->client->request('POST', '/assets', [
+        $response = $this->client->request('POST', 'assets', [
             'body' => [
                 'name' => $id,
                 'id' => $id,
@@ -139,22 +144,22 @@ final class LocoProvider implements ProviderInterface
         ]);
 
         if (409 === $response->getStatusCode()) {
-            $this->logger->info(sprintf('Translation key (%s) already exists in Loco.', $id), [
+            $this->logger->info(sprintf('Translation key "%s" already exists in Loco.', $id), [
                 'id' => $id,
             ]);
         } elseif (201 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add new translation key (%s) to Loco: (status code: "%s") "%s".', $id, $response->getStatusCode(), $response->getContent(false)), $response);
+            $this->logger->error(sprintf('Unable to add new translation key "%s" to Loco: (status code: "%s") "%s".', $id, $response->getStatusCode(), $response->getContent(false)));
         }
     }
 
     private function translateAsset(string $id, string $message, string $locale): void
     {
-        $response = $this->client->request('POST', sprintf('/translations/%s/%s', $id, $locale), [
+        $response = $this->client->request('POST', sprintf('translations/%s/%s', $id, $locale), [
             'body' => $message,
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add translation message "%s" (for key: "%s" in locale "%s") to Loco: "%s".', $message, $id, $locale, $response->getContent(false)), $response);
+            $this->logger->error(sprintf('Unable to add translation message "%s" (for key: "%s" in locale "%s") to Loco: "%s".', $message, $id, $locale, $response->getContent(false)));
         }
     }
 
@@ -166,31 +171,31 @@ final class LocoProvider implements ProviderInterface
             $this->createTag($tag);
         }
 
-        $response = $this->client->request('POST', sprintf('/tags/%s.json', $tag), [
+        $response = $this->client->request('POST', sprintf('tags/%s.json', $tag), [
             'body' => $idsAsString,
         ]);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add tag (%s) on translation keys (%s) to Loco: "%s".', $tag, $idsAsString, $response->getContent(false)), $response);
+            $this->logger->error(sprintf('Unable to add tag "%s" on translation keys "%s" to Loco: "%s".', $tag, $idsAsString, $response->getContent(false)));
         }
     }
 
     private function createTag(string $tag): void
     {
-        $response = $this->client->request('POST', '/tags.json', [
+        $response = $this->client->request('POST', 'tags.json', [
             'body' => [
                 'name' => $tag,
             ],
         ]);
 
         if (201 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to create tag (%s) on Loco: "%s".', $tag, $response->getContent(false)), $response);
+            $this->logger->error(sprintf('Unable to create tag "%s" on Loco: "%s".', $tag, $response->getContent(false)));
         }
     }
 
     private function getTags(): array
     {
-        $response = $this->client->request('GET', '/tags.json');
+        $response = $this->client->request('GET', 'tags.json');
         $content = $response->toArray(false);
 
         if (200 !== $response->getStatusCode()) {
@@ -200,12 +205,41 @@ final class LocoProvider implements ProviderInterface
         return $content ?: [];
     }
 
-    private function deleteAsset(string $id): void
+    private function createLocale(string $locale): void
     {
-        $response = $this->client->request('DELETE', sprintf('/assets/%s.json', $id));
+        $response = $this->client->request('POST', 'locales', [
+            'body' => [
+                'code' => $locale,
+            ],
+        ]);
+
+        if (201 !== $response->getStatusCode()) {
+            $this->logger->error(sprintf('Unable to create locale "%s" on Loco: "%s".', $locale, $response->getContent(false)));
+        }
+    }
+
+    private function getLocales(): array
+    {
+        $response = $this->client->request('GET', 'locales');
+        $content = $response->toArray(false);
 
         if (200 !== $response->getStatusCode()) {
-            throw new ProviderException(sprintf('Unable to add new translation key (%s) to Loco: "%s".', $id, $response->getContent(false)), $response);
+            throw new ProviderException(sprintf('Unable to get locales on Loco: "%s".', $response->getContent(false)), $response);
+        }
+
+        return array_reduce($content, function ($carry, $locale) {
+            $carry[] = $locale['code'];
+
+            return $carry;
+        }, []);
+    }
+
+    private function deleteAsset(string $id): void
+    {
+        $response = $this->client->request('DELETE', sprintf('assets/%s.json', $id));
+
+        if (200 !== $response->getStatusCode()) {
+            $this->logger->error(sprintf('Unable to delete translation key "%s" to Loco: "%s".', $id, $response->getContent(false)));
         }
     }
 }

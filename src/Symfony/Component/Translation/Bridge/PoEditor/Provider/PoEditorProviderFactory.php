@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class PoEditorProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'poeditor';
-    private const HOST = 'api.poeditor.com/v2';
+    private const HOST = 'api.poeditor.com/v2/';
 
     private $client;
     private $logger;

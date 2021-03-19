@@ -28,7 +28,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CrowdinProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'crowdin';
-    public const HOST = 'api.crowdin.com/api/v2';
+    public const HOST = 'api.crowdin.com/api/v2/';
     private const DSN_OPTION_DOMAIN = 'domain';
 
     private $client;

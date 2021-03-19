@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class LocoProviderFactory extends AbstractProviderFactory
 {
     public const SCHEME = 'loco';
-    private const HOST = 'localise.biz/api';
+    private const HOST = 'localise.biz/api/';
 
     private $client;
     private $logger;
