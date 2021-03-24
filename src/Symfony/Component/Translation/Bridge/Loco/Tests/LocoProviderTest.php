@@ -9,18 +9,17 @@ use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\Loader\XliffFileLoader;
 use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\Tests\ProviderTestCase;
 use Symfony\Component\Translation\TranslatorBag;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class LocoProviderTest extends ProviderTestCase
 {
-    /**
-     * @dataProvider getProviderData
-     */
-    public function testToString(LocoProvider $provider, string $expected)
+    public function createProvider(HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, string $endpoint): ProviderInterface
     {
-        $this->assertSame($expected, (string) $provider);
+        return new LocoProvider($client, $loader, $logger, $defaultLocale, $endpoint);
     }
 
     public function testGetName()
@@ -30,7 +29,7 @@ class LocoProviderTest extends ProviderTestCase
             'headers' => [
                 'Authorization' => 'Loco API_KEY',
             ],
-        ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api'))->getName());
+        ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api/'))->getName());
     }
 
     public function testCompleteWriteProcess()
@@ -39,10 +38,26 @@ class LocoProviderTest extends ProviderTestCase
         $createAssetResponse->expects($this->exactly(4))
             ->method('getStatusCode')
             ->willReturn(201);
+
+        $getLocaleResponse = $this->createMock(ResponseInterface::class);
+        $getLocaleResponse->expects($this->exactly(4))
+            ->method('getStatusCode')
+            ->willReturn(200);
+        $getLocaleResponse->expects($this->exactly(2))
+            ->method('getContent')
+            ->with(false)
+            ->willReturn('[{"code":"en"}]');
+
+        $createLocaleResponse = $this->createMock(ResponseInterface::class);
+        $createLocaleResponse->expects($this->exactly(2))
+            ->method('getStatusCode')
+            ->willReturn(201);
+
         $translateAssetResponse = $this->createMock(ResponseInterface::class);
         $translateAssetResponse->expects($this->exactly(8))
             ->method('getStatusCode')
             ->willReturn(200);
+
         $getTagsEmptyResponse = $this->createMock(ResponseInterface::class);
         $getTagsEmptyResponse->expects($this->exactly(2))
             ->method('getStatusCode')
@@ -51,6 +66,7 @@ class LocoProviderTest extends ProviderTestCase
             ->method('getContent')
             ->with(false)
             ->willReturn('[]');
+
         $getTagsNotEmptyResponse = $this->createMock(ResponseInterface::class);
         $getTagsNotEmptyResponse->expects($this->exactly(2))
             ->method('getStatusCode')
@@ -59,10 +75,12 @@ class LocoProviderTest extends ProviderTestCase
             ->method('getContent')
             ->with(false)
             ->willReturn('["messages"]');
+
         $createTagResponse = $this->createMock(ResponseInterface::class);
         $createTagResponse->expects($this->exactly(4))
             ->method('getStatusCode')
             ->willReturn(201);
+
         $tagAssetResponse = $this->createMock(ResponseInterface::class);
         $tagAssetResponse->expects($this->exactly(4))
             ->method('getStatusCode')
@@ -87,14 +105,14 @@ class LocoProviderTest extends ProviderTestCase
             },
             'getTags1' => function (string $method, string $url, array $options = []) use ($getTagsEmptyResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('GET', $method);
-                $this->assertEquals('https://localise.biz/api//tags.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
 
                 return $getTagsEmptyResponse;
             },
             'createTag1' => function (string $method, string $url, array $options = []) use ($createTagResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//tags.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals(http_build_query(['name' => 'messages']), $options['body']);
 
@@ -102,7 +120,7 @@ class LocoProviderTest extends ProviderTestCase
             },
             'tagAsset1' => function (string $method, string $url, array $options = []) use ($tagAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//tags/messages.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags/messages.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('a', $options['body']);
 
@@ -124,14 +142,14 @@ class LocoProviderTest extends ProviderTestCase
             },
             'getTags2' => function (string $method, string $url, array $options = []) use ($getTagsNotEmptyResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('GET', $method);
-                $this->assertEquals('https://localise.biz/api//tags.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
 
                 return $getTagsNotEmptyResponse;
             },
             'createTag2' => function (string $method, string $url, array $options = []) use ($createTagResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//tags.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals(http_build_query(['name' => 'validators']), $options['body']);
 
@@ -139,16 +157,24 @@ class LocoProviderTest extends ProviderTestCase
             },
             'tagAsset2' => function (string $method, string $url, array $options = []) use ($tagAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//tags/validators.json', $url);
+                $this->assertEquals('https://localise.biz/api/tags/validators.json', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('post.num_comments', $options['body']);
 
                 return $tagAssetResponse;
             },
 
+            'getLocale1' => function (string $method, string $url, array $options = []) use ($getLocaleResponse, $expectedAuthHeader): ResponseInterface {
+                $this->assertEquals('GET', $method);
+                $this->assertEquals('https://localise.biz/api/locales', $url);
+                $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
+
+                return $getLocaleResponse;
+            },
+
             'translateAsset1' => function (string $method, string $url, array $options = []) use ($translateAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//translations/a/en', $url);
+                $this->assertEquals('https://localise.biz/api/translations/a/en', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('trans_en_a', $options['body']);
 
@@ -156,15 +182,33 @@ class LocoProviderTest extends ProviderTestCase
             },
             'translateAsset2' => function (string $method, string $url, array $options = []) use ($translateAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//translations/post.num_comments/en', $url);
+                $this->assertEquals('https://localise.biz/api/translations/post.num_comments/en', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('{count, plural, one {# comment} other {# comments}}', $options['body']);
 
                 return $translateAssetResponse;
             },
+
+            'getLocale2' => function (string $method, string $url, array $options = []) use ($getLocaleResponse, $expectedAuthHeader): ResponseInterface {
+                $this->assertEquals('GET', $method);
+                $this->assertEquals('https://localise.biz/api/locales', $url);
+                $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
+
+                return $getLocaleResponse;
+            },
+
+            'createLocale1' => function (string $method, string $url, array $options = []) use ($createLocaleResponse, $expectedAuthHeader): ResponseInterface {
+                $this->assertEquals('POST', $method);
+                $this->assertEquals('https://localise.biz/api/locales', $url);
+                $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
+                $this->assertEquals('code=fr', $options['body']);
+
+                return $createLocaleResponse;
+            },
+
             'translateAsset3' => function (string $method, string $url, array $options = []) use ($translateAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//translations/a/fr', $url);
+                $this->assertEquals('https://localise.biz/api/translations/a/fr', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('trans_fr_a', $options['body']);
 
@@ -172,7 +216,7 @@ class LocoProviderTest extends ProviderTestCase
             },
             'translateAsset4' => function (string $method, string $url, array $options = []) use ($translateAssetResponse, $expectedAuthHeader): ResponseInterface {
                 $this->assertEquals('POST', $method);
-                $this->assertEquals('https://localise.biz/api//translations/post.num_comments/fr', $url);
+                $this->assertEquals('https://localise.biz/api/translations/post.num_comments/fr', $url);
                 $this->assertEquals($expectedAuthHeader, $options['normalized_headers']['authorization'][0]);
                 $this->assertEquals('{count, plural, one {# commentaire} other {# commentaires}}', $options['body']);
 
@@ -190,13 +234,13 @@ class LocoProviderTest extends ProviderTestCase
             'validators' => ['post.num_comments' => '{count, plural, one {# commentaire} other {# commentaires}}'],
         ]));
 
-        $locoProvider = new LocoProvider((new MockHttpClient($responses))->withOptions([
+        $provider = $this->createProvider((new MockHttpClient($responses))->withOptions([
             'base_uri' => 'https://localise.biz/api/',
             'headers' => [
                 'Authorization' => 'Loco API_KEY',
             ],
-        ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api');
-        $locoProvider->write($translatorBag);
+        ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api/');
+        $provider->write($translatorBag);
     }
 
     /**
@@ -217,12 +261,12 @@ class LocoProviderTest extends ProviderTestCase
             ->method('load')
             ->willReturn($expectedTranslatorBag->getCatalogue($locale));
 
-        $locoProvider = new LocoProvider((new MockHttpClient($response))->withOptions([
+        $locoProvider = $this->createProvider((new MockHttpClient($response))->withOptions([
             'base_uri' => 'https://localise.biz/api/',
             'headers' => [
                 'Authorization' => 'Loco API_KEY',
             ],
-        ]), $loader, $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api');
+        ]), $loader, $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api/');
         $translatorBag = $locoProvider->read([$domain], [$locale]);
 
         $this->assertEquals($expectedTranslatorBag->all(), $translatorBag->all());
@@ -248,7 +292,7 @@ class LocoProviderTest extends ProviderTestCase
                     'headers' => [
                         'Authorization' => 'Loco API_KEY',
                     ],
-                ]), new XliffFileLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api');
+                ]), new XliffFileLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api/');
                 $translatorBag = $locoProvider->read([$domain], [$locale]);
                 // We don't want to assert equality of metadata here, due to the ArrayLoader usage.
                 $translatorBag->getCatalogue($locale)->deleteMetadata('foo', '');
@@ -258,7 +302,7 @@ class LocoProviderTest extends ProviderTestCase
         }
     }
 
-    public function getProviderData(): \Generator
+    public function toStringProvider(): iterable
     {
         yield [
             new LocoProvider($this->getClient()->withOptions([
@@ -266,8 +310,8 @@ class LocoProviderTest extends ProviderTestCase
                 'headers' => [
                     'Authorization' => 'Loco API_KEY',
                 ],
-            ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api'),
-            'loco://localise.biz/api',
+            ]), $this->getLoader(), $this->getLogger(), $this->getDefaultLocale(), 'localise.biz/api/'),
+            'loco://localise.biz/api/',
         ];
 
         yield [

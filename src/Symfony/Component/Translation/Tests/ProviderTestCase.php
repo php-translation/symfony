@@ -14,11 +14,14 @@ namespace Symfony\Component\Translation\Tests;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\Translation\Bridge\Loco\Provider\LocoProvider;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Component\Translation\Provider\ProviderInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * A test case to ease testing a translation provider factory.
+ * A test case to ease testing a translation provider.
  *
  * @author Mathieu Santostefano <msantostefano@protonmail.com>
  */
@@ -29,6 +32,21 @@ abstract class ProviderTestCase extends TestCase
     protected $defaultLocale;
     protected $loader;
     protected $xliffFileDumper;
+
+    abstract public function createProvider(HttpClientInterface $client, LoaderInterface $loader, LoggerInterface $logger, string $defaultLocale, string $endpoint): ProviderInterface;
+
+    /**
+     * @return iterable<array{0: string, 1: ProviderInterface}>
+     */
+    abstract public function toStringProvider(): iterable;
+
+    /**
+     * @dataProvider toStringProvider
+     */
+    public function testToString(LocoProvider $provider, string $expected)
+    {
+        $this->assertSame($expected, (string) $provider);
+    }
 
     protected function getClient(): MockHttpClient
     {
