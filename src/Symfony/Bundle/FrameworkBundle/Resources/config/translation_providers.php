@@ -21,7 +21,7 @@ return static function (ContainerConfigurator $container) {
     $container->services()
         ->set('translation.provider_factory.null', NullProviderFactory::class)
             ->args([
-                service('http_client'),
+                service('http_client')->nullOnInvalid(),
                 service('logger'),
                 param('kernel.default_locale'),
             ])

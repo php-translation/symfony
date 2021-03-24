@@ -262,7 +262,7 @@ class Translator implements TranslatorInterface, TranslatorBagInterface, LocaleA
     public function all(): array
     {
         $messages = [];
-        
+
         foreach ($this->catalogues as $locale => $catalogue) {
             $messages[$locale] = $catalogue->all();
         }
